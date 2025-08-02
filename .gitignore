@@ -1,0 +1,29 @@
+# Node modules (if using Node.js)
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+
+# Build files (optional)
+dist/
+build/
+
+# IDE files
+.vscode/
+.idea/
+
+# Cache files
+*.cache
+.cache/
+npm-debug.log*
+
+# Other sensitive stuff
+credentials.json
