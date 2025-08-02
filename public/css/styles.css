@@ -84,6 +84,10 @@ header {
   color: #e9912d;
 }
 
+.highlight-green {
+  color: #6be36f;
+}
+
 .btn1{
     background-color: #fd7e14;
     border-color: #fd7e14;
@@ -120,4 +124,63 @@ header {
   border-radius: 50px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   gap: 1rem;
+}
+
+.info-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 20px;
+}
+
+.coin-icon {
+  width: 80px;
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+.blockchain-ani {
+  display: grid;
+  grid-template-rows: auto;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "imp-info ani1"
+  "imp-info2 ani1";
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  margin-left: 16%;
+  color: #C9D1D9;
+  /* border-left: 2px solid #FF6B00; */
+}
+
+.imp-info {
+  font-size: 1rem;
+  color: #C9D1D9;
+  margin-top: 10px;
+  border-left: #6be36f 2px solid;
+  padding-left: 10px;
+  grid-area: imp-info;
+}
+
+.ani1{
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  grid-area: ani1;
+
+}
+
+.imp-info2 {
+  font-size: 1rem;
+  color: #C9D1D9;
+  margin-top: 10px;
+  border-left: #6be36f 2px solid;
+  padding-left: 10px;
+  grid-area: imp-info2;
 }
