@@ -11,7 +11,9 @@
   <link rel="stylesheet" href="/css/styles.css">
 
 
-
+  <script>
+  setTimeout(() => location.reload(), 60000); // Refresh every 60s
+  </script>
 
 </head>
 <body>
@@ -84,7 +86,7 @@
 <!-- <hr> -->
 <div class="container1">
     <div class="text1 text-center">
-        <h2 class="text-light">Powerful Crypto Data API</h2>
+        <h2 class="text-light">Powerful <span class="highlight-orange">Crypto</span> Data API</h2>
         <p class="sub-intro2">Access real-time crypto price, market data, NFT floor prices, trading volume, metadata, historical data, and more with our crypto data API.</p>
     <div class="info-content">
       <div> <h2 class="highlight-green">10 Billion+</h2>
@@ -112,8 +114,73 @@
     </div>
 
     </div>
-    
+
+   <div class="container2">
+    <div class="text2 text-center">
+        <h2 class="text-light">Supported <span style="color: #4e83d7;">Networks</span></h2>
+    <p>Extensive Coverage Across Multiple Chains</p>
+    <p>Fetch crypto prices and market data from 200+ networks, from major blockchains to new launches.</p>
+    </div>
+    <div class="slot1">
+    <div class="ani2 container text-center mt-5">
+    <lottie-player
+      src="/animations/network.json"
+      background="transparent"
+      speed="1"
+      style="width: 500px; height: 400px;"
+      loop
+      autoplay>
+    </lottie-player>
+  </div>
+
+  <!-- Lottie Player Script -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+    <div class="imp-info3">
+    <ul>
+      <li>Includes top chains like Bitcoin, Ethereum, BNB, Solana, and more.</li>
+      <li>Stay up-to-date with support for the latest blockchain launches.</li>
+      <li>Get live prices and market stats from multiple networks in one place.</li>
+      <li>Pulled from trusted sources like exchanges and on-chain data.</li>
+      <li>Aggregated from verified exchanges and oracles to ensure quality.</li>
+      <li>Built for enterprise-grade performance with scalability in mind.</li>
+      <li>Live market data across all networks — fast, accurate, and reliable.</li>
+    </ul>
+  </div>
+
+  </div>
+  </div>
+  
 </div>
 
-</body>
-</html>
+
+
+<div class="crypto-cards">
+  <div class="container my-5">
+     <h3 class=" cryptoHe text-light">Explore Our API</h3>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+      <% coins.forEach(coin => { %>
+        <div class="col d-flex align-items-stretch">
+          <div class="card shadow-sm h-100 w-100">
+            <img src="<%= coin.image %>" class="card-img-top" alt="<%= coin.name %>" style="width:100%; height:225px; object-fit:contain; background:#f8f9fa;">
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title mt-2"><%= coin.name %> (<%= coin.symbol.toUpperCase() %>)</h5>
+              <p class="card-text fw-bold">$<%= coin.current_price?.toLocaleString() || 'N/A' %></p>
+                <p class="<%= coin.price_change_percentage_24h >= 0 ? 'text-success' : 'text-danger' %> fw-bold" style="font-size:1.1rem; ">
+                  <%= coin.price_change_percentage_24h?.toFixed(2) || '0.00' %>% 
+  
+                <%= coin.price_change_percentage_24h >= 0 ? '+' : '' %><%= coin.price_change_percentage_24h?.toFixed(2) || '0.00' %>% (24h)
+                </p>
+              <p class="text-warning">Market Cap: $<%= coin.market_cap?.toLocaleString() || 'N/A' %></p>
+              <p class="text-warning">Volume (24h): $<%= coin.total_volume?.toLocaleString() || 'N/A' %></p>
+              <p class="text-warning">Circulating Supply: <%= coin.circulating_supply?.toLocaleString() || 'N/A' %> <%= coin.symbol.toUpperCase() %></p>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+
+    </div>
+  </div>
+<%- include('partials/footer.ejs') %>
+</div>

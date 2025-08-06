@@ -1,6 +1,7 @@
 body {
   background-color:#323539;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #C9D1D9;
 }
 
 h1 {
@@ -183,4 +184,71 @@ header {
   border-left: #6be36f 2px solid;
   padding-left: 10px;
   grid-area: imp-info2;
+}
+
+.container2{
+  color: #C9D1D9;
+  margin-top: 40px;
+  padding: 20px;
+}
+
+.ani2{
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  /* grid-area: ani2; */
+  margin-bottom: 25%;
+}
+
+.slot1{
+  display: grid ;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
+
+.imp-info3 {
+  font-size: 1rem;
+  color: #C9D1D9;
+  border-left: #6be36f 2px solid;
+  padding-left: 10px;
+  margin-bottom: 150px;
+}
+
+.card {
+  background-color: #0e213a;
+  border-radius: 40px;
+  padding: 20px;
+  color: #C9D1D9;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+  border-radius: 40px 40px 40px 40px;
+  max-width: 100%;
+  height: auto;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  border: 2px solid #fd7e14;
+  box-shadow: 0 0 15px rgba(253, 126, 20, 0.5);
+  transition: all 0.3s ease-in-out;
+} 
+
+.cryptoHe{
+  color: #FFFFFF;
+  font-size: 2.5rem;
+  margin-top: 20px;
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.crypto-cards {
+  margin-bottom: 1000px;
+}
+
+.container{
+  margin-bottom: 100px;
 }
