@@ -20,6 +20,11 @@ app.get('/', async (req, res) => {
   res.render('index');
 });
 
+app.get("/partials/graphs", (req, res) => {
+  res.render("graphs"); // looks for graphs.ejs in views/
+});
+
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -252,3 +252,12 @@ header {
 .container{
   margin-bottom: 100px;
 }
+
+.ForGraphs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 200px;
+  background-color: #4a4e52;
+}
