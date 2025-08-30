@@ -9,56 +9,59 @@
 </head>
 <body>
   <%- include('partials/header') %>
-  <div class="container py-5">
+  <div class="containerCharts py-5">
     <h1 class="text-center mb-4">Live Crypto Graphs</h1>
     <p class="text-center text-light">Here you’ll see charts for Bitcoin, Ethereum, BNB and more.</p>
 
+
+<div class="ForGraphs">
     <!-- Placeholder for your charts -->
-    <div id="graphsArea" class="row row-cols-1 row-cols-md-2 g-4">
+    <div id="graphsArea" class="row row-cols-1 row-cols-md-1 g-4">
       <div class="col">
         <div class="card shadow-sm">
           <div class="card-body">
             <h5 class="card-title">Bitcoin Chart</h5>
-            <canvas id="btcChart"></canvas>
+              <canvas id="btcChart" width="500" height="300" style="display:block; width:100%; height:300px;"></canvas>
+            </div>
           </div>
         </div>
-      </div>
+      
       <!-- Repeat for other coins -->
 
-    <div id="graphsArea" class="row row-cols-1 row-cols-md-2 g-4">
+    <div id="graphsArea" class="row row-cols-md-1 row-cols-md-1 g-2">
       <div class="col">
         <div class="card shadow-sm">
           <div class="card-body">
             <h5 class="card-title">Ethereum Chart</h5>
-            <canvas id="ethChart"></canvas>
+            <canvas id="ethChart" width="500" height="300" style="max-width:100%;"></canvas>
           </div>
         </div>
       </div>
 
-    <div id="graphsArea" class="row row-cols-1 row-cols-md-2 g-4">
+    <div id="graphsArea" class="row row-cols-1 row-cols-md-1 g-2">
       <div class="col">
         <div class="card shadow-sm">
           <div class="card-body">
             <h5 class="card-title">BNB Chart</h5>
-            <canvas id="bnbChart"></canvas>
+            <canvas id="bnbChart" width="500" height="300" style="max-width:100%;"></canvas>
           </div>
         </div>
       </div>
       
 
-    <div id="graphsArea" class="row row-cols-1 row-cols-md-2 g-4">
+    <div id="graphsArea" class="row row-cols-1 row-cols-md-1 g-2">
       <div class="col">
         <div class="card shadow-sm">
           <div class="card-body">
             <h5 class="card-title">XRP Chart</h5>
-            <canvas id="xrpChart"></canvas>
+            <canvas id="xrpChart" width="500" height="300" style="max-width:100%;"></canvas>
           </div>
         </div>
       </div>
 
     </div>
-  </div>
-
+</div>
+</div>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
@@ -126,8 +129,9 @@
 
 
   </script>
+</div>
 
-
-</body>
   <%- include('partials/footer') %>
+</body>
+
 </html>

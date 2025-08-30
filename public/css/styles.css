@@ -17,9 +17,22 @@ header {
   background-color: #161b22;
   color: #C9D1D9;
   display: inline;
-    padding: 100px;
+  padding: 100px;
 
 }
+footer {
+  background: #0f3460;
+  padding: 15px 0;
+  text-align: center;
+  color: #fff;
+  font-size: 1rem;
+  width: 100%;
+  position: relative;
+  bottom: 0;
+  left: 0;
+  margin-top: 50px;
+}
+
 
 .nav-link {
   color: #FF6B00;
@@ -258,6 +271,6 @@ header {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  margin-top: 200px;
+  margin-top: 100px;
   background-color: #4a4e52;
 }

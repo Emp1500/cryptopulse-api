@@ -12,18 +12,30 @@ app.get('/', async (req, res) => {
   try {
     const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,binancecoin,solana,ripple,cardano&order=market_cap_desc&per_page=6&page=1&sparkline=false');
     const data = await response.json();
-    res.render('index', {coins:data});  
+    return res.render('index', { coins: data });
   } catch (error) {
     console.log('Error fetching data:', error);
     return res.status(500).send('Internal Server Error');
   }
-  res.render('index');
 });
+
 
 app.get("/partials/graphs", (req, res) => {
-  res.render("graphs"); // looks for graphs.ejs in views/
+  res.render("graphs"); 
 });
 
+
+app.get('/home', (req, res) => {
+  res.redirect('/');
+});
+
+app.get('/news', (req, res) => {
+  res.redirect('https://coinmarketcap.com/headlines/news/');
+});
+
+app.get('/markets', (req, res) => {
+  res.render('partials/markets');
+});
 
 // Start server
 const PORT = process.env.PORT || 3000;
