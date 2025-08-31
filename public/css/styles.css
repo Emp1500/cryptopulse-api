@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Cedarville+Cursive&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
 body {
   background-color:#323539;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -20,27 +23,42 @@ header {
   padding: 100px;
 
 }
+      
 footer {
-  background: #0f3460;
-  padding: 15px 0;
-  text-align: center;
-  color: #fff;
-  font-size: 1rem;
-  width: 100%;
-  position: relative;
-  bottom: 0;
-  left: 0;
-  margin-top: 50px;
+    background: #0f3460;
+    padding: 20px 0;
+    text-align: center;
+    color: #fff;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 50px;
 }
 
 
-.nav-link {
-  color: #FF6B00;
-}
-.nav-link:hover {
-  color: #ff0000;
-  text-decoration: underline;
-}
+ header .nav-link {
+            color: #C9D1D9;
+            transition: color 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+        }
+
+        header .nav-link:hover {
+            color: #fd7e14;
+        }
+
+        header .nav-link.active {
+             color: #fd7e14;
+             font-weight: 700;
+        }
+
+        header {
+            background-color: #161b22;
+            color: #C9D1D9;
+            display: inline;
+            padding: 100px;
+        }
+        
 
 .main-intro {
   color: #FFFFFF;

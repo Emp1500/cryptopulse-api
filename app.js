@@ -37,6 +37,10 @@ app.get('/markets', (req, res) => {
   res.render('partials/markets');
 });
 
+app.get('/about', (req, res) => {
+  res.render('partials/about');
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Cedarville+Cursive&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
+/* Your Custom Styles - Integrated */
+body {
+    background-color: #323539;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #C9D1D9;
+}
+
+h1, h2, h3 {
+    color: #FFFFFF;
+}
+
+p {
+    font-size: 18px;
+    color: #C9D1D9;
+}
+
+/* Styles for the new header to override Bootstrap defaults where needed */
+header .nav-link {
+    color: #C9D1D9;
+    transition: color 0.3s ease;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+}
+
+header .nav-link:hover {
+    color: #fd7e14;
+}
+
+header .nav-link.active {
+        color: #fd7e14;
+        font-weight: 700;
+}
+
+header {
+    background-color: #161b22;
+    color: #C9D1D9;
+    display: inline;
+    padding: 100px;
+}
+
+footer {
+    background: #0f3460;
+    padding: 20px 0;
+    text-align: center;
+    color: #fff;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 50px;
+}
+
+.highlight-orange {
+    color: #fd7e14;
+}
+
+/* Card styles from your homepage CSS */
+.custom-card {
+    background-color: #161b22; /* Darker card background for contrast */
+    border-radius: 20px;
+    padding: 2rem;
+    color: #C9D1D9;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.custom-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+} 
+
+/* Section Title styles adapted from your CSS */
+.section-title {
+    font-size: 2.25rem; /* Equivalent to text-3xl */
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+    font-size: 1.125rem; /* Equivalent to text-lg */
+    color: #C9D1D9;
+    max-width: 42rem; /* max-w-2xl */
+    margin-left: auto;
+    margin-right: auto;
+}
