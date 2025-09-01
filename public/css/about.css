@@ -38,7 +38,8 @@ header .nav-link.active {
 header {
     background-color: #161b22;
     color: #C9D1D9;
-    display: inline;
+    display: flex;
+    align-items: center;
     padding: 100px;
 }
 
@@ -85,4 +86,15 @@ footer {
     max-width: 42rem; /* max-w-2xl */
     margin-left: auto;
     margin-right: auto;
+}
+
+.solCard{
+    margin-left: 30%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.bull{
+    margin-top: 50px;
 }
