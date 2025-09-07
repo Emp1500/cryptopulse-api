@@ -17,42 +17,6 @@ p {
     color: #C9D1D9;
 }
 
-/* Styles for the new header to override Bootstrap defaults where needed */
-header .nav-link {
-    color: #C9D1D9;
-    transition: color 0.3s ease;
-    font-size: 1rem;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-}
-
-header .nav-link:hover {
-    color: #fd7e14;
-}
-
-header .nav-link.active {
-        color: #fd7e14;
-        font-weight: 700;
-}
-
-header {
-    background-color: #161b22;
-    color: #C9D1D9;
-    display: flex;
-    align-items: center;
-    padding: 100px;
-}
-
-footer {
-    background: #0f3460;
-    padding: 20px 0;
-    text-align: center;
-    color: #fff;
-    font-size: 1rem;
-    width: 100%;
-    margin-top: 50px;
-}
-
 .highlight-orange {
     color: #fd7e14;
 }

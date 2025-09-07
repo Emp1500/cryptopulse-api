@@ -9,6 +9,7 @@
 
   <!-- ✅ Your custom CSS -->
   <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/other.css">
 
 
   <script>
@@ -168,7 +169,6 @@
               <h5 class="card-title mt-2"><%= coin.name %> (<%= coin.symbol.toUpperCase() %>)</h5>
               <p class="card-text fw-bold">$<%= coin.current_price?.toLocaleString() || 'N/A' %></p>
                 <p class="<%= coin.price_change_percentage_24h >= 0 ? 'text-success' : 'text-danger' %> fw-bold" style="font-size:1.1rem; ">
-                  <%= coin.price_change_percentage_24h?.toFixed(2) || '0.00' %>% 
   
                 <%= coin.price_change_percentage_24h >= 0 ? '+' : '' %><%= coin.price_change_percentage_24h?.toFixed(2) || '0.00' %>% (24h)
                 </p>
@@ -183,31 +183,29 @@
 
 
 
-<div class="ForGraphs">
-  <div class="position-relative p-5 text-center text-muted border border-dashed rounded-5">
-    
-    
+  <div class="ForGraphs">
+    <div class="position-relative p-5 text-center text-muted border border-dashed rounded-5">
+      
+      
 
-    <!-- Title -->
-    <h1 class="text-body-emphasis">Explore our Graphs</h1>
-    
-    <!-- Description -->
-    <p class="col-lg-6 mx-auto mb-4">
-      Market cap charts display the total value of a cryptocurrency, calculated by multiplying its price by the circulating supply. They help assess a coin's size and dominance in the market.
-    </p>
-    
-    <!-- Call to Action -->
-    <a href="partials/graphs" class="btn btn-warning px-5 mb-5">
-      View Graphs
-    </a>
+      <!-- Title -->
+      <h1 class="text-body-emphasis">Explore our Graphs</h1>
+      
+      <!-- Description -->
+      <p class="col-lg-6 mx-auto mb-4">
+        Market cap charts display the total value of a cryptocurrency, calculated by multiplying its price by the circulating supply. They help assess a coin's size and dominance in the market.
+      </p>
+      
+      <!-- Call to Action -->
+      <a href="partials/graphs" class="btn btn-warning px-5 mb-5">
+        View Graphs
+      </a>
 
-    
-  </div>
-</div>
-
-
+      
+      </div>
     </div>
+
   </div>
-<%- include('partials/footer.ejs') %>
-</div>
+  <%- include('partials/footer') %>
 </body>
+</html>
