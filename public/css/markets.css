@@ -1,0 +1,70 @@
+body {
+    background-color: #23272f;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #7c8d9e;
+    margin: 0;
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #b8afa8;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+#market-table th, #market-table td {
+    background-color: #2c2f36;
+    color: #a4a19e;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #3a3f47;
+}
+
+
+.coin-info img {
+    box-shadow: 0 2px 8px rgba(253, 126, 20, 0.12);
+    border: 2px solid #fd7e14;
+}
+
+#market-table {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #2c2f36;
+}
+
+#market-data-body{
+    font-size: 0.95rem;
+    color: #7c8d9e;
+    background-color: #23272f;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+}
+
+.coin-info { display: flex; align-items: center; }
+.coin-info img { width: 32px; height: 32px; margin-right: 1rem; border-radius: 50%; }
+.coin-name { font-weight: 600; color: #fff; }
+.coin-symbol { font-size: 0.8rem; color: #8b949e; text-transform: uppercase; }
+.price-positive { color: #6be36f; } /* Highlight green */
+.price-negative { color: #ff6b6b; } /* A suitable red */
+
+/* Loading Spinner */
+#loadingSpinner { display: flex; justify-content: center; align-items: center; height: 300px; }
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-left-color: #fd7e14;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

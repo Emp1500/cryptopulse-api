@@ -33,12 +33,13 @@ app.get('/news', (req, res) => {
   res.redirect('https://coinmarketcap.com/headlines/news/');
 });
 
-app.get('/markets', (req, res) => {
-  res.render('partials/markets');
-});
 
 app.get('/about', (req, res) => {
   res.render('partials/about');
+});
+
+app.get('/markets', (req, res) => {
+  res.render('partials/markets');
 });
 
 // Start server
