@@ -19,7 +19,6 @@ header {
     background-color: #161b22;
     color: #C9D1D9;
     display: grid;
-    grid-template-rows: 1fr 1fr;
     align-items: center;
     padding: 100px;
 }
