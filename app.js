@@ -31,7 +31,7 @@ app.get('/', async (req, res) => {
 });
 
 app.get("/graphs", (req, res) => {
-  res.render("partials/graphs");
+  res.render("graphs");
 });
 
 app.get('/home', (req, res) => {

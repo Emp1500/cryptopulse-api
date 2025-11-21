@@ -1,8 +1,10 @@
 {
   "name": "cryptipulse",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
+    "build": "echo \"No build required\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

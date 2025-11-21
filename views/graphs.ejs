@@ -14,126 +14,112 @@
     <h1 class="text-center mb-4">Live Crypto Graphs</h1>
     <p class="text-center text-light">Here you’ll see charts for Bitcoin, Ethereum, BNB and more.</p>
 
-
-<div class="ForGraphs">
-    <!-- Placeholder for your charts -->
-    <div id="graphsArea" class="row row-cols-1 row-cols-md-1 g-4">
-      <div class="col">
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Bitcoin Chart</h5>
-              <canvas id="btcChart" width="500" height="300" style="display:block; width:100%; height:300px;"></canvas>
+    <div class="ForGraphs">
+      <!-- Placeholder for your charts -->
+      <div id="graphsArea" class="row row-cols-1 row-cols-md-2 g-4">
+        <div class="col">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Bitcoin Chart</h5>
+              <canvas id="btcChart"></canvas>
             </div>
           </div>
         </div>
-      
-      <!-- Repeat for other coins -->
-
-    <div id="graphsArea" class="row row-cols-md-1 row-cols-md-1 g-2">
-      <div class="col">
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Ethereum Chart</h5>
-            <canvas id="ethChart" width="500" height="300" style="max-width:100%;"></canvas>
+        <div class="col">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">Ethereum Chart</h5>
+              <canvas id="ethChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">BNB Chart</h5>
+              <canvas id="bnbChart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">XRP Chart</h5>
+              <canvas id="xrpChart"></canvas>
+            </div>
           </div>
         </div>
       </div>
-
-    <div id="graphsArea" class="row row-cols-1 row-cols-md-1 g-2">
-      <div class="col">
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">BNB Chart</h5>
-            <canvas id="bnbChart" width="500" height="300" style="max-width:100%;"></canvas>
-          </div>
-        </div>
-      </div>
-      
-
-    <div id="graphsArea" class="row row-cols-1 row-cols-md-1 g-2">
-      <div class="col">
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">XRP Chart</h5>
-            <canvas id="xrpChart" width="500" height="300" style="max-width:100%;"></canvas>
-          </div>
-        </div>
-      </div>
-
     </div>
-</div>
-</div>
+  </div>
+
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // Example BTC chart
-    const ctx = document.getElementById('btcChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-        datasets: [{
-          label: 'BTC Price',
-          data: [32000, 33000, 35000, 34000, 36000],
-          borderColor: '#f7931a',
-          borderWidth: 2,
-          fill: false,
-        }]
-      }
+    document.addEventListener('DOMContentLoaded', function () {
+        // Example BTC chart
+        const ctx = document.getElementById('btcChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                datasets: [{
+                    label: 'BTC Price',
+                    data: [32000, 33000, 35000, 34000, 36000],
+                    borderColor: '#f7931a',
+                    borderWidth: 2,
+                    fill: false,
+                }]
+            }
+        });
+
+        const ctx2 = document.getElementById('ethChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                datasets: [{
+                    label: 'ETH Price',
+                    data: [2000, 2100, 2200, 2150, 2250],
+                    borderColor: '#3c3c3d',
+                    borderWidth: 2,
+                    fill: false,
+                }]
+            }
+        });
+
+        const ctx3 = document.getElementById('bnbChart').getContext('2d');
+        new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                datasets: [{
+                    label: 'BNB Price',
+                    data: [300, 320, 310, 330, 340],
+                    borderColor: '#f0b90b',
+                    borderWidth: 2,
+                    fill: false,
+                }]
+            }
+        });
+
+        const ctx4 = document.getElementById('xrpChart').getContext('2d');
+        new Chart(ctx4, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                datasets: [{
+                    label: 'XRP Price',
+                    data: [0.3, 0.32, 0.31, 0.33, 0.34],
+                    borderColor: '#4b5b8c',
+                    borderWidth: 2,
+                    fill: false,
+                }]
+            }
+        });
     });
-
-    const ctx2 = document.getElementById('ethChart').getContext('2d');
-    new Chart(ctx2, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-        datasets: [{
-          label: 'ETH Price',
-          data: [2000, 2100, 2200, 2150, 2250],
-          borderColor: '#3c3c3d',
-          borderWidth: 2,
-          fill: false,
-        }]
-      }
-    });
-
-
-    const ctx3 = document.getElementById('bnbChart').getContext('2d');  
-    new Chart(ctx3, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-        datasets: [{
-          label: 'BNB Price',
-          data: [300, 320, 310, 330, 340],
-          borderColor: '#f0b90b',
-          borderWidth: 2,
-          fill: false,
-        }]
-      }
-    });
-
-    const ctx4 = document.getElementById('xrpChart').getContext('2d');
-    new Chart(ctx4, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-        datasets: [{
-          label: 'XRP Price',
-          data: [0.3, 0.32, 0.31, 0.33, 0.34],
-          borderColor: '#4b5b8c',
-          borderWidth: 2,
-          fill: false,
-        }]
-      }
-    });
-
-
   </script>
-</div>
-</div>
-  </div>
+  
   <%- include('partials/footer') %>
 </body>
-
 </html>
