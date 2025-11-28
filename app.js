@@ -1,7 +1,16 @@
 const express = require('express');
 const app = express();
 const path = require('path');
-const axios = require('axios'); // Kept in case you add more API calls later
+const axios = require('axios');
+
+// In-memory cache to store API data
+const cache = {
+  coins: null,
+  lastFetch: 0,
+};
+
+// Cache duration: 5 minutes in milliseconds
+const CACHE_DURATION = 5 * 60 * 1000;
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -11,7 +20,16 @@ app.use(express.static(path.join(__dirname, 'public'))); // For serving CSS, ima
 // Routes
 app.get('/', async (req, res) => {
   try {
-    // Fetching the top 10 coins dynamically, as you originally planned.
+    const now = Date.now();
+    // 1. Check if the cache is still valid
+    if (cache.coins && (now - cache.lastFetch < CACHE_DURATION)) {
+      console.log('Serving data from cache');
+      // 1a. If valid, serve data from cache
+      return res.render('index', { coins: cache.coins });
+    }
+
+    // 2. If cache is invalid or empty, fetch new data
+    console.log('Fetching new data from CoinGecko API');
     const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
       params: {
         vs_currency: 'usd',
@@ -23,9 +41,20 @@ app.get('/', async (req, res) => {
       },
     });
     const coins = response.data || [];
+
+    // 3. Update the cache with the new data and timestamp
+    cache.coins = coins;
+    cache.lastFetch = now;
+
     return res.render('index', { coins });
   } catch (error) {
     console.error('Error fetching data for homepage:', error.message);
+    // 4. If the API fails, serve stale data from the cache if available
+    if (cache.coins) {
+      console.log('API error: serving stale data from cache');
+      return res.render('index', { coins: cache.coins });
+    }
+    // 5. If there's no cache and the API fails, show an error
     return res.status(500).send('Internal Server Error');
   }
 });
