@@ -236,7 +236,7 @@ Contributions are welcome! Follow these steps to contribute:
 1. **Fork the repository**
    ```bash
    # Click "Fork" on GitHub, then clone your fork
-   git clone https://github.com/YOUR_USERNAME/cryptipulse.git
+   git clone https://github.com/Emp1500/cryptipulse.git
    ```
 
 2. **Create a feature branch**
@@ -302,7 +302,7 @@ This project is licensed under the **ISC License**.
 **Built with passion by [Vedant Wagh](https://github.com/Emp1500)**
 
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Emp1500)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/vedantwagh)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/vedantwagh15)
 
 If you found this project helpful, please consider giving it a star!
 
