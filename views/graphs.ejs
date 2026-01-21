@@ -12,15 +12,15 @@
   <%- include('partials/header') %>
   <div class="containerCharts py-5">
     <h1 class="text-center mb-4">Live Crypto Graphs</h1>
-    <p class="text-center text-light">Here you’ll see charts for Bitcoin, Ethereum, BNB and more.</p>
+    <p class="text-center text-light">Real-time price charts for Bitcoin, Ethereum, BNB and XRP (30-day history).</p>
 
     <div class="ForGraphs">
-      <!-- Placeholder for your charts -->
       <div id="graphsArea" class="row row-cols-1 row-cols-md-2 g-4">
         <div class="col">
           <div class="card shadow-sm">
             <div class="card-body">
-              <h5 class="card-title">Bitcoin Chart</h5>
+              <h5 class="card-title">Bitcoin (BTC)</h5>
+              <div id="btcLoading" class="text-center py-3">Loading...</div>
               <canvas id="btcChart"></canvas>
             </div>
           </div>
@@ -28,7 +28,8 @@
         <div class="col">
           <div class="card shadow-sm">
             <div class="card-body">
-              <h5 class="card-title">Ethereum Chart</h5>
+              <h5 class="card-title">Ethereum (ETH)</h5>
+              <div id="ethLoading" class="text-center py-3">Loading...</div>
               <canvas id="ethChart"></canvas>
             </div>
           </div>
@@ -36,7 +37,8 @@
         <div class="col">
           <div class="card shadow-sm">
             <div class="card-body">
-              <h5 class="card-title">BNB Chart</h5>
+              <h5 class="card-title">BNB</h5>
+              <div id="bnbLoading" class="text-center py-3">Loading...</div>
               <canvas id="bnbChart"></canvas>
             </div>
           </div>
@@ -44,7 +46,8 @@
         <div class="col">
           <div class="card shadow-sm">
             <div class="card-body">
-              <h5 class="card-title">XRP Chart</h5>
+              <h5 class="card-title">XRP</h5>
+              <div id="xrpLoading" class="text-center py-3">Loading...</div>
               <canvas id="xrpChart"></canvas>
             </div>
           </div>
@@ -57,69 +60,127 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Example BTC chart
-        const ctx = document.getElementById('btcChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-                datasets: [{
-                    label: 'BTC Price',
-                    data: [32000, 33000, 35000, 34000, 36000],
-                    borderColor: '#f7931a',
-                    borderWidth: 2,
-                    fill: false,
-                }]
-            }
-        });
+        // Coin configurations
+        const coins = [
+            { id: 'bitcoin', symbol: 'BTC', canvasId: 'btcChart', loadingId: 'btcLoading', color: '#f7931a' },
+            { id: 'ethereum', symbol: 'ETH', canvasId: 'ethChart', loadingId: 'ethLoading', color: '#627eea' },
+            { id: 'binancecoin', symbol: 'BNB', canvasId: 'bnbChart', loadingId: 'bnbLoading', color: '#f0b90b' },
+            { id: 'ripple', symbol: 'XRP', canvasId: 'xrpChart', loadingId: 'xrpLoading', color: '#23292f' }
+        ];
 
-        const ctx2 = document.getElementById('ethChart').getContext('2d');
-        new Chart(ctx2, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-                datasets: [{
-                    label: 'ETH Price',
-                    data: [2000, 2100, 2200, 2150, 2250],
-                    borderColor: '#3c3c3d',
-                    borderWidth: 2,
-                    fill: false,
-                }]
-            }
-        });
+        // Fetch historical data and create chart
+        async function fetchAndCreateChart(coin) {
+            const loadingEl = document.getElementById(coin.loadingId);
+            const canvasEl = document.getElementById(coin.canvasId);
 
-        const ctx3 = document.getElementById('bnbChart').getContext('2d');
-        new Chart(ctx3, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-                datasets: [{
-                    label: 'BNB Price',
-                    data: [300, 320, 310, 330, 340],
-                    borderColor: '#f0b90b',
-                    borderWidth: 2,
-                    fill: false,
-                }]
-            }
-        });
+            try {
+                // Fetch 30 days of historical data
+                const response = await fetch(
+                    `https://api.coingecko.com/api/v3/coins/${coin.id}/market_chart?vs_currency=usd&days=30`
+                );
 
-        const ctx4 = document.getElementById('xrpChart').getContext('2d');
-        new Chart(ctx4, {
-            type: 'line',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-                datasets: [{
-                    label: 'XRP Price',
-                    data: [0.3, 0.32, 0.31, 0.33, 0.34],
-                    borderColor: '#4b5b8c',
-                    borderWidth: 2,
-                    fill: false,
-                }]
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Extract prices (data.prices is array of [timestamp, price])
+                const prices = data.prices;
+
+                // Create labels (dates) and values (prices)
+                const labels = prices.map(p => {
+                    const date = new Date(p[0]);
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+                const values = prices.map(p => p[1]);
+
+                // Sample data to reduce points (every 6th point for ~5 points per day)
+                const sampledLabels = labels.filter((_, i) => i % 6 === 0);
+                const sampledValues = values.filter((_, i) => i % 6 === 0);
+
+                // Hide loading, show canvas
+                loadingEl.style.display = 'none';
+                canvasEl.style.display = 'block';
+
+                // Create chart
+                const ctx = canvasEl.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: sampledLabels,
+                        datasets: [{
+                            label: `${coin.symbol} Price (USD)`,
+                            data: sampledValues,
+                            borderColor: coin.color,
+                            backgroundColor: coin.color + '20',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0,
+                            pointHoverRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                labels: {
+                                    color: '#c9d1d9'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return '$' + context.parsed.y.toLocaleString('en-US', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
+                                        });
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    color: '#8b949e',
+                                    maxTicksLimit: 8
+                                },
+                                grid: {
+                                    color: '#30363d'
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    color: '#8b949e',
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString();
+                                    }
+                                },
+                                grid: {
+                                    color: '#30363d'
+                                }
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error(`Error fetching ${coin.symbol} data:`, error);
+                loadingEl.innerHTML = `<span class="text-danger">Failed to load ${coin.symbol} data</span>`;
             }
+        }
+
+        // Fetch all charts with slight delays to avoid rate limiting
+        coins.forEach((coin, index) => {
+            setTimeout(() => {
+                fetchAndCreateChart(coin);
+            }, index * 500); // 500ms delay between each request
         });
     });
   </script>
-  
+
   <%- include('partials/footer') %>
 </body>
 </html>

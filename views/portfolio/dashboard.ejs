@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - CryptoPulse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/other.css">
+    <link rel="stylesheet" href="/css/portfolio.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+
+    <div class="portfolio-container">
+        <!-- Portfolio Header -->
+        <div class="portfolio-header">
+            <div>
+                <h1>My Portfolio</h1>
+                <p>Track and manage your cryptocurrency investments</p>
+            </div>
+            <button class="btn-add-holding" onclick="openAddModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Holding
+            </button>
+        </div>
+
+        <!-- Portfolio Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="summary-label">Total Value</div>
+                <div class="summary-value">$<%= totalValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Total Invested</div>
+                <div class="summary-value">$<%= totalInvested.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+            </div>
+            <div class="summary-card <%= totalProfitLoss >= 0 ? 'profit' : 'loss' %>">
+                <div class="summary-label">Profit / Loss</div>
+                <div class="summary-value">
+                    <%= totalProfitLoss >= 0 ? '+' : '' %>$<%= totalProfitLoss.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
+                    <span class="summary-percent">(<%= totalProfitLossPercent >= 0 ? '+' : '' %><%= totalProfitLossPercent.toFixed(2) %>%)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Holdings Table -->
+        <div class="holdings-section">
+            <h2>My Holdings</h2>
+            <% if (holdings.length === 0) { %>
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <h3>No Holdings Yet</h3>
+                    <p>Start building your portfolio by adding your first cryptocurrency holding.</p>
+                    <button class="btn-add-holding" onclick="openAddModal()">Add Your First Holding</button>
+                </div>
+            <% } else { %>
+                <div class="table-responsive">
+                    <table class="holdings-table">
+                        <thead>
+                            <tr>
+                                <th>Coin</th>
+                                <th>Amount</th>
+                                <th>Avg. Price</th>
+                                <th>Current Price</th>
+                                <th>Value</th>
+                                <th>P/L</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% holdings.forEach(holding => { %>
+                                <tr data-id="<%= holding.id %>">
+                                    <td>
+                                        <div class="coin-info">
+                                            <img src="<%= holding.image %>" alt="<%= holding.name %>" class="coin-icon">
+                                            <div>
+                                                <div class="coin-name"><%= holding.name %></div>
+                                                <div class="coin-symbol"><%= holding.symbol %></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><%= holding.quantity.toLocaleString('en-US', {maximumFractionDigits: 8}) %></td>
+                                    <td>$<%= holding.purchasePrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
+                                    <td>
+                                        <div>$<%= holding.currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+                                        <div class="price-change <%= holding.priceChange24h >= 0 ? 'positive' : 'negative' %>">
+                                            <%= holding.priceChange24h >= 0 ? '+' : '' %><%= holding.priceChange24h.toFixed(2) %>%
+                                        </div>
+                                    </td>
+                                    <td>$<%= holding.currentValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
+                                    <td class="<%= holding.profitLossPercent >= 0 ? 'profit' : 'loss' %>">
+                                        <%= holding.profitLossPercent >= 0 ? '+' : '' %><%= holding.profitLossPercent.toFixed(2) %>%
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-action btn-edit" onclick="openEditModal(<%= JSON.stringify(holding).replace(/"/g, '&quot;') %>)" title="Edit">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                </svg>
+                                            </button>
+                                            <button class="btn-action btn-delete" onclick="deleteHolding(<%= holding.id %>)" title="Delete">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Add/Edit Holding Modal -->
+    <div id="holdingModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Holding</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="holdingForm" onsubmit="saveHolding(event)">
+                <input type="hidden" id="holdingId" name="holdingId">
+                <input type="hidden" id="coinId" name="coinId">
+                <input type="hidden" id="coinImage" name="coinImage">
+
+                <div class="form-group">
+                    <label for="coinSearch">Search Coin</label>
+                    <div class="search-wrapper">
+                        <input type="text" id="coinSearch" class="form-control" placeholder="Search for a coin..." autocomplete="off">
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
+                    <div id="selectedCoin" class="selected-coin" style="display: none;">
+                        <img id="selectedCoinImage" src="" alt="">
+                        <span id="selectedCoinName"></span>
+                        <button type="button" class="btn-clear" onclick="clearCoinSelection()">&times;</button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quantity">Quantity</label>
+                        <input type="number" id="quantity" name="quantity" class="form-control" step="any" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="purchasePrice">Purchase Price ($)</label>
+                        <div class="price-input-wrapper">
+                            <input type="number" id="purchasePrice" name="purchasePrice" class="form-control" step="any" min="0" required>
+                            <button type="button" class="btn-current-price" onclick="useCurrentPrice()">Current</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="purchaseDate">Purchase Date</label>
+                    <input type="date" id="purchaseDate" name="purchaseDate" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="notes">Notes (optional)</label>
+                    <textarea id="notes" name="notes" class="form-control" rows="2" placeholder="Add any notes..."></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn-save" id="saveBtn">Add Holding</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Confirm Delete</h2>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <p>Are you sure you want to delete this holding? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="btn-delete-confirm" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/portfolio.js"></script>
+</body>
+</html>
