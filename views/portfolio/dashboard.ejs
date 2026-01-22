@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/other.css">
     <link rel="stylesheet" href="/css/portfolio.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <%- include('../partials/header') %>
@@ -121,6 +122,93 @@
                 </div>
             <% } %>
         </div>
+
+        <% if (holdings.length > 0) { %>
+        <!-- Analytics Section -->
+        <div class="analytics-section">
+            <h2>Portfolio Analytics</h2>
+
+            <div class="analytics-grid">
+                <!-- Allocation Pie Chart -->
+                <div class="analytics-card">
+                    <h3>Allocation by Coin</h3>
+                    <div class="chart-container">
+                        <canvas id="allocationChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Performance Line Chart -->
+                <div class="analytics-card">
+                    <h3>Portfolio Performance</h3>
+                    <div class="time-filters">
+                        <button class="time-btn active" data-period="24h">24H</button>
+                        <button class="time-btn" data-period="7d">7D</button>
+                        <button class="time-btn" data-period="30d">30D</button>
+                        <button class="time-btn" data-period="all">ALL</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Best/Worst Performers -->
+            <div class="performers-grid">
+                <div class="performer-card best">
+                    <div class="performer-label">Best Performer</div>
+                    <% const bestPerformer = holdings.reduce((best, h) => h.profitLossPercent > best.profitLossPercent ? h : best, holdings[0]); %>
+                    <div class="performer-info">
+                        <img src="<%= bestPerformer.image %>" alt="<%= bestPerformer.name %>" class="performer-icon">
+                        <div>
+                            <div class="performer-name"><%= bestPerformer.name %> (<%= bestPerformer.symbol %>)</div>
+                            <div class="performer-change positive">+<%= bestPerformer.profitLossPercent.toFixed(2) %>%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="performer-card worst">
+                    <div class="performer-label">Worst Performer</div>
+                    <% const worstPerformer = holdings.reduce((worst, h) => h.profitLossPercent < worst.profitLossPercent ? h : worst, holdings[0]); %>
+                    <div class="performer-info">
+                        <img src="<%= worstPerformer.image %>" alt="<%= worstPerformer.name %>" class="performer-icon">
+                        <div>
+                            <div class="performer-name"><%= worstPerformer.name %> (<%= worstPerformer.symbol %>)</div>
+                            <div class="performer-change <%= worstPerformer.profitLossPercent >= 0 ? 'positive' : 'negative' %>">
+                                <%= worstPerformer.profitLossPercent >= 0 ? '+' : '' %><%= worstPerformer.profitLossPercent.toFixed(2) %>%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="metrics-section">
+                <h3>Performance Metrics</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">24H Change</div>
+                        <% const avg24hChange = holdings.reduce((sum, h) => sum + (h.priceChange24h * h.currentValue), 0) / totalValue; %>
+                        <div class="metric-value <%= avg24hChange >= 0 ? 'positive' : 'negative' %>">
+                            <%= avg24hChange >= 0 ? '+' : '' %><%= avg24hChange.toFixed(2) %>%
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Return</div>
+                        <div class="metric-value <%= totalProfitLossPercent >= 0 ? 'positive' : 'negative' %>">
+                            <%= totalProfitLossPercent >= 0 ? '+' : '' %><%= totalProfitLossPercent.toFixed(2) %>%
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Coins</div>
+                        <div class="metric-value neutral"><%= holdings.length %></div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Avg. Position Size</div>
+                        <div class="metric-value neutral">$<%= (totalValue / holdings.length).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
     </div>
 
     <!-- Add/Edit Holding Modal -->
@@ -199,5 +287,179 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/portfolio.js"></script>
+
+    <% if (holdings.length > 0) { %>
+    <script>
+        // Chart.js default configuration
+        Chart.defaults.color = '#8b949e';
+        Chart.defaults.borderColor = '#30363d';
+
+        // Allocation Pie Chart
+        const allocationCtx = document.getElementById('allocationChart').getContext('2d');
+        const allocationData = <%- JSON.stringify(holdings.map(h => ({ name: h.name, symbol: h.symbol, value: h.currentValue }))) %>;
+        const totalValue = <%= totalValue %>;
+
+        const colors = [
+            '#fd7e14', '#2ecc71', '#3498db', '#9b59b6', '#e74c3c',
+            '#f39c12', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722'
+        ];
+
+        new Chart(allocationCtx, {
+            type: 'doughnut',
+            data: {
+                labels: allocationData.map(d => `${d.symbol} (${((d.value / totalValue) * 100).toFixed(1)}%)`),
+                datasets: [{
+                    data: allocationData.map(d => d.value),
+                    backgroundColor: colors.slice(0, allocationData.length),
+                    borderColor: '#1e2a3a',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const percentage = ((value / totalValue) * 100).toFixed(1);
+                                return `$${value.toLocaleString()} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Performance Line Chart (Mock historical data for now)
+        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+
+        // Generate mock performance data
+        function generateMockPerformanceData(days) {
+            const data = [];
+            const labels = [];
+            let value = totalValue * 0.85; // Start at 85% of current value
+            const volatility = 0.02;
+
+            for (let i = days; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+
+                if (days <= 1) {
+                    labels.push(date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
+                } else if (days <= 7) {
+                    labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+                } else {
+                    labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                }
+
+                // Random walk towards current value
+                const progress = (days - i) / days;
+                const target = totalValue;
+                value = value + (target - value) * 0.1 + (Math.random() - 0.5) * value * volatility;
+                data.push(value);
+            }
+
+            // Ensure last point is current value
+            data[data.length - 1] = totalValue;
+
+            return { labels, data };
+        }
+
+        let performanceChart;
+
+        function updatePerformanceChart(period) {
+            const days = period === '24h' ? 1 : period === '7d' ? 7 : period === '30d' ? 30 : 90;
+            const { labels, data } = generateMockPerformanceData(days);
+
+            if (performanceChart) {
+                performanceChart.destroy();
+            }
+
+            const gradient = performanceCtx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(253, 126, 20, 0.3)');
+            gradient.addColorStop(1, 'rgba(253, 126, 20, 0)');
+
+            performanceChart = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Portfolio Value',
+                        data: data,
+                        borderColor: '#fd7e14',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#fd7e14',
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '$' + context.raw.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(48, 54, 61, 0.5)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize with 7d view
+        updatePerformanceChart('7d');
+
+        // Time filter buttons
+        document.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                updatePerformanceChart(this.dataset.period);
+            });
+        });
+    </script>
+    <% } %>
 </body>
 </html>
