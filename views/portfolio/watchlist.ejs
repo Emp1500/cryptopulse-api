@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watchlist - CryptoPulse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/other.css">
+    <link rel="stylesheet" href="/css/portfolio.css">
+    <link rel="stylesheet" href="/css/watchlist.css">
+</head>
+<body>
+    <%- include('../partials/header') %>
+
+    <div class="watchlist-container">
+        <!-- Watchlist Header -->
+        <div class="watchlist-header">
+            <div>
+                <h1>My Watchlist</h1>
+                <p>Track cryptocurrencies you're interested in</p>
+            </div>
+            <button class="btn-add-coin" onclick="openAddWatchlistModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Coin
+            </button>
+        </div>
+
+        <!-- Watchlist Content -->
+        <div class="watchlist-content">
+            <% if (watchlist.length === 0) { %>
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <h3>Your Watchlist is Empty</h3>
+                    <p>Start tracking cryptocurrencies by adding them to your watchlist.</p>
+                    <button class="btn-add-coin" onclick="openAddWatchlistModal()">Add Your First Coin</button>
+                </div>
+            <% } else { %>
+                <!-- Watchlist Table -->
+                <div class="watchlist-table-container">
+                    <table class="watchlist-table">
+                        <thead>
+                            <tr>
+                                <th class="th-rank">#</th>
+                                <th class="th-coin">Coin</th>
+                                <th class="th-price">Price</th>
+                                <th class="th-change">24h %</th>
+                                <th class="th-change">7d %</th>
+                                <th class="th-mcap">Market Cap</th>
+                                <th class="th-volume">Volume (24h)</th>
+                                <th class="th-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% watchlist.forEach((coin, index) => { %>
+                                <tr data-coin-id="<%= coin.coinId %>">
+                                    <td class="td-rank"><%= index + 1 %></td>
+                                    <td class="td-coin">
+                                        <div class="coin-info">
+                                            <img src="<%= coin.image %>" alt="<%= coin.name %>" class="coin-icon">
+                                            <div>
+                                                <div class="coin-name"><%= coin.name %></div>
+                                                <div class="coin-symbol"><%= coin.symbol %></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="td-price">$<%= coin.currentPrice ? coin.currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: coin.currentPrice < 1 ? 6 : 2}) : '--' %></td>
+                                    <td class="td-change <%= coin.priceChange24h >= 0 ? 'positive' : 'negative' %>">
+                                        <span class="change-badge <%= coin.priceChange24h >= 0 ? 'up' : 'down' %>">
+                                            <%= coin.priceChange24h >= 0 ? '+' : '' %><%= coin.priceChange24h ? coin.priceChange24h.toFixed(2) : '0.00' %>%
+                                        </span>
+                                    </td>
+                                    <td class="td-change <%= coin.priceChange7d >= 0 ? 'positive' : 'negative' %>">
+                                        <span class="change-badge <%= coin.priceChange7d >= 0 ? 'up' : 'down' %>">
+                                            <%= coin.priceChange7d >= 0 ? '+' : '' %><%= coin.priceChange7d ? coin.priceChange7d.toFixed(2) : '0.00' %>%
+                                        </span>
+                                    </td>
+                                    <td class="td-mcap">$<%= coin.marketCap ? (coin.marketCap / 1e9).toFixed(2) + 'B' : '--' %></td>
+                                    <td class="td-volume">$<%= coin.volume24h ? (coin.volume24h / 1e9).toFixed(2) + 'B' : '--' %></td>
+                                    <td class="td-actions">
+                                        <div class="action-buttons">
+                                            <button class="btn-action btn-alert" onclick="openAlertModal('<%= coin.coinId %>', '<%= coin.name %>', '<%= coin.symbol %>', <%= coin.currentPrice || 0 %>)" title="Set Price Alert">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                                </svg>
+                                            </button>
+                                            <button class="btn-action btn-add-portfolio" onclick="quickAddToPortfolio('<%= coin.coinId %>', '<%= coin.name %>', '<%= coin.symbol %>', '<%= coin.image %>', <%= coin.currentPrice || 0 %>)" title="Add to Portfolio">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                </svg>
+                                            </button>
+                                            <button class="btn-action btn-remove" onclick="removeFromWatchlist('<%= coin.coinId %>')" title="Remove from Watchlist">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Legend -->
+                <div class="watchlist-legend">
+                    <div class="legend-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path></svg>
+                        <span>Set Alert</span>
+                    </div>
+                    <div class="legend-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Add to Portfolio</span>
+                    </div>
+                    <div class="legend-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <span>Remove</span>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Add to Watchlist Modal -->
+    <div id="addWatchlistModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add to Watchlist</h2>
+                <button class="modal-close" onclick="closeAddWatchlistModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="watchlistCoinSearch">Search Coin</label>
+                    <div class="search-wrapper">
+                        <input type="text" id="watchlistCoinSearch" class="form-control" placeholder="Search for a cryptocurrency..." autocomplete="off">
+                        <div id="watchlistSearchResults" class="search-results"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Price Alert Modal -->
+    <div id="alertModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content modal-alert">
+            <div class="modal-header">
+                <h2>Set Price Alert</h2>
+                <button class="modal-close" onclick="closeAlertModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-coin-info">
+                    <span id="alertCoinName">Bitcoin (BTC)</span>
+                    <span id="alertCurrentPrice" class="alert-current-price">$0.00</span>
+                </div>
+
+                <input type="hidden" id="alertCoinId">
+
+                <div class="alert-options">
+                    <div class="alert-option">
+                        <label class="alert-checkbox">
+                            <input type="checkbox" id="alertAboveEnabled">
+                            <span class="checkmark"></span>
+                            Alert when price goes above
+                        </label>
+                        <div class="alert-input-wrapper">
+                            <span class="currency-symbol">$</span>
+                            <input type="number" id="alertAbovePrice" class="form-control" placeholder="0.00" step="any">
+                        </div>
+                    </div>
+
+                    <div class="alert-option">
+                        <label class="alert-checkbox">
+                            <input type="checkbox" id="alertBelowEnabled">
+                            <span class="checkmark"></span>
+                            Alert when price goes below
+                        </label>
+                        <div class="alert-input-wrapper">
+                            <span class="currency-symbol">$</span>
+                            <input type="number" id="alertBelowPrice" class="form-control" placeholder="0.00" step="any">
+                        </div>
+                    </div>
+                </div>
+
+                <p class="alert-note">Price alerts are saved locally and checked when you visit the site.</p>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeAlertModal()">Cancel</button>
+                    <button type="button" class="btn-save" onclick="saveAlert()">Save Alert</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Add to Portfolio Modal -->
+    <div id="quickAddModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Quick Add to Portfolio</h2>
+                <button class="modal-close" onclick="closeQuickAddModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="quick-add-coin-info">
+                    <img id="quickAddCoinImage" src="" alt="" class="coin-icon-large">
+                    <div>
+                        <div id="quickAddCoinName" class="coin-name-large"></div>
+                        <div id="quickAddCoinPrice" class="coin-price-large"></div>
+                    </div>
+                </div>
+
+                <input type="hidden" id="quickAddCoinId">
+                <input type="hidden" id="quickAddCoinSymbol">
+                <input type="hidden" id="quickAddCoinImageUrl">
+                <input type="hidden" id="quickAddCoinCurrentPrice">
+
+                <div class="form-group">
+                    <label for="quickAddQuantity">Quantity</label>
+                    <input type="number" id="quickAddQuantity" class="form-control" step="any" min="0" placeholder="0.00" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="quickAddPurchasePrice">Purchase Price ($)</label>
+                    <div class="price-input-wrapper">
+                        <input type="number" id="quickAddPurchasePrice" class="form-control" step="any" min="0" placeholder="0.00" required>
+                        <button type="button" class="btn-current-price" onclick="useQuickAddCurrentPrice()">Current</button>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeQuickAddModal()">Cancel</button>
+                    <button type="button" class="btn-save" onclick="submitQuickAdd()">Add to Portfolio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remove Confirmation Modal -->
+    <div id="removeModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Remove from Watchlist</h2>
+                <button class="modal-close" onclick="closeRemoveModal()">&times;</button>
+            </div>
+            <p>Are you sure you want to remove this coin from your watchlist?</p>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeRemoveModal()">Cancel</button>
+                <button type="button" class="btn-delete-confirm" id="confirmRemoveBtn">Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/watchlist.js"></script>
+</body>
+</html>

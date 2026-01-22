@@ -7,6 +7,36 @@ const { isAuthenticated } = require('../middleware/auth');
 // Using a Map to store portfolios by user ID
 const mockPortfolios = new Map();
 
+// Mock watchlist data (will be replaced by database in Phase 5)
+const mockWatchlists = new Map();
+
+// Initialize demo user watchlist
+mockWatchlists.set(1, {
+  coins: [
+    {
+      coinId: 'cardano',
+      symbol: 'ADA',
+      name: 'Cardano',
+      image: 'https://assets.coingecko.com/coins/images/975/large/cardano.png',
+      addedAt: '2024-03-01'
+    },
+    {
+      coinId: 'polkadot',
+      symbol: 'DOT',
+      name: 'Polkadot',
+      image: 'https://assets.coingecko.com/coins/images/12171/large/polkadot.png',
+      addedAt: '2024-03-05'
+    },
+    {
+      coinId: 'avalanche-2',
+      symbol: 'AVAX',
+      name: 'Avalanche',
+      image: 'https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png',
+      addedAt: '2024-03-10'
+    }
+  ]
+});
+
 // Initialize demo user portfolio
 mockPortfolios.set(1, {
   holdings: [
@@ -52,6 +82,14 @@ function getUserPortfolio(userId) {
     mockPortfolios.set(userId, { holdings: [] });
   }
   return mockPortfolios.get(userId);
+}
+
+// Helper function to get user watchlist
+function getUserWatchlist(userId) {
+  if (!mockWatchlists.has(userId)) {
+    mockWatchlists.set(userId, { coins: [] });
+  }
+  return mockWatchlists.get(userId);
 }
 
 // Helper function to fetch current prices
@@ -215,6 +253,127 @@ router.delete('/holdings/:id', isAuthenticated, (req, res) => {
   }
 
   portfolio.holdings.splice(holdingIndex, 1);
+
+  res.json({ success: true });
+});
+
+// ==================== WATCHLIST ROUTES ====================
+
+// Helper function to fetch detailed coin data for watchlist
+async function fetchWatchlistData(coinIds) {
+  if (coinIds.length === 0) return {};
+
+  try {
+    const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+      params: {
+        ids: coinIds.join(','),
+        vs_currencies: 'usd',
+        include_24hr_change: true,
+        include_7d_change: true,
+        include_market_cap: true,
+        include_24hr_vol: true
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching watchlist data:', error.message);
+    return {};
+  }
+}
+
+// GET /portfolio/watchlist - Watchlist page
+router.get('/watchlist', isAuthenticated, async (req, res) => {
+  const userId = req.session.user.id;
+  const watchlist = getUserWatchlist(userId);
+
+  // Get current data for all watchlist coins
+  const coinIds = watchlist.coins.map(c => c.coinId);
+  const coinData = await fetchWatchlistData(coinIds);
+
+  const watchlistWithData = watchlist.coins.map(coin => {
+    const data = coinData[coin.coinId] || {};
+    return {
+      ...coin,
+      currentPrice: data.usd || null,
+      priceChange24h: data.usd_24h_change || 0,
+      priceChange7d: data.usd_7d_change || 0,
+      marketCap: data.usd_market_cap || null,
+      volume24h: data.usd_24h_vol || null
+    };
+  });
+
+  res.render('portfolio/watchlist', {
+    watchlist: watchlistWithData
+  });
+});
+
+// GET /portfolio/watchlist/data - Get watchlist as JSON
+router.get('/watchlist/data', isAuthenticated, async (req, res) => {
+  const userId = req.session.user.id;
+  const watchlist = getUserWatchlist(userId);
+
+  const coinIds = watchlist.coins.map(c => c.coinId);
+  const coinData = await fetchWatchlistData(coinIds);
+
+  const watchlistWithData = watchlist.coins.map(coin => {
+    const data = coinData[coin.coinId] || {};
+    return {
+      ...coin,
+      currentPrice: data.usd || null,
+      priceChange24h: data.usd_24h_change || 0,
+      priceChange7d: data.usd_7d_change || 0,
+      marketCap: data.usd_market_cap || null,
+      volume24h: data.usd_24h_vol || null
+    };
+  });
+
+  res.json(watchlistWithData);
+});
+
+// POST /portfolio/watchlist - Add coin to watchlist
+router.post('/watchlist', isAuthenticated, (req, res) => {
+  const userId = req.session.user.id;
+  const { coinId, name, symbol, image } = req.body;
+
+  // Validation
+  if (!coinId || !name || !symbol) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const watchlist = getUserWatchlist(userId);
+
+  // Check if coin already exists in watchlist
+  const exists = watchlist.coins.find(c => c.coinId === coinId);
+  if (exists) {
+    return res.status(400).json({ error: 'Coin already in watchlist' });
+  }
+
+  const newCoin = {
+    coinId,
+    symbol: symbol.toUpperCase(),
+    name,
+    image: image || '',
+    addedAt: new Date().toISOString().split('T')[0]
+  };
+
+  watchlist.coins.push(newCoin);
+
+  res.json({ success: true, coin: newCoin });
+});
+
+// DELETE /portfolio/watchlist/:coinId - Remove coin from watchlist
+router.delete('/watchlist/:coinId', isAuthenticated, (req, res) => {
+  const userId = req.session.user.id;
+  const coinId = req.params.coinId;
+
+  const watchlist = getUserWatchlist(userId);
+  const coinIndex = watchlist.coins.findIndex(c => c.coinId === coinId);
+
+  if (coinIndex === -1) {
+    return res.status(404).json({ error: 'Coin not found in watchlist' });
+  }
+
+  watchlist.coins.splice(coinIndex, 1);
 
   res.json({ success: true });
 });
