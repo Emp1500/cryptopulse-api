@@ -1,31 +1,713 @@
-body {
-    background-color: #1a1a2e;
-    color: #fff;
-    font-family: 'Roboto', sans-serif;
+/* Charts Page Styles */
+
+.charts-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
+    min-height: calc(100vh - 200px);
 }
 
-/* 
-.containerCharts {
+.charts-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.charts-header h1 {
+    color: #ffffff;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+}
+
+.charts-header p {
+    color: #8b949e;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+/* Charts Grid - Desktop first, then responsive */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+/* Chart Card */
+.chart-card {
+    background: #1e2a3a;
+    border-radius: 16px;
+    border: 1px solid #30363d;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chart-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Card Header */
+.chart-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #30363d;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.coin-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.coin-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.coin-title h3 {
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.coin-symbol {
+    color: #8b949e;
+    font-size: 0.85rem;
+    display: block;
+}
+
+.price-info {
+    text-align: right;
+}
+
+.current-price {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    line-height: 1.2;
+}
+
+.price-change {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.price-change.positive {
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.15);
+}
+
+.price-change.negative {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.15);
+}
+
+/* Chart Stats */
+.chart-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: #30363d;
+    border-bottom: 1px solid #30363d;
+}
+
+.stat {
+    background: #1e2a3a;
+    padding: 12px 8px;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    color: #8b949e;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+}
+
+.stat-value {
+    display: block;
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Time Filters */
+.time-filters {
+    display: flex;
+    gap: 6px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #30363d;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.time-btn {
+    padding: 8px 14px;
+    background: transparent;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    color: #8b949e;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.time-btn:hover {
+    border-color: #fd7e14;
+    color: #fd7e14;
+    background: rgba(253, 126, 20, 0.1);
+}
+
+.time-btn.active {
+    background: linear-gradient(135deg, #fd7e14 0%, #e55a00 100%);
+    border-color: #fd7e14;
+    color: #ffffff;
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 280px;
+    padding: 16px;
+}
+
+.price-chart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Loading State */
+.chart-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    width: 100vw;
-    max-width: 100vw;
-    padding: 20px;
-    margin: 0;
-} */
-
-.ForGraphs {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
-    width: 100%;
-    max-width: 1000px;
-    padding: 100px;
-    margin-left: 25%;
-    margin: auto;
-    gap: 100px; /* space between each graph */
+    justify-content: center;
+    gap: 12px;
+    color: #8b949e;
+    font-size: 0.9rem;
+    background: #1e2a3a;
 }
 
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #30363d;
+    border-top-color: #fd7e14;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.chart-loading .error {
+    color: #e74c3c;
+}
+
+/* Chart Footer */
+.chart-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: rgba(13, 27, 42, 0.5);
+    border-top: 1px solid #30363d;
+}
+
+.chart-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #8b949e;
+    font-size: 0.75rem;
+}
+
+.info-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2ecc71;
+    flex-shrink: 0;
+}
+
+.data-source {
+    color: #6e7681;
+    font-size: 0.7rem;
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* Large Desktop (1400px+) */
+@media (min-width: 1400px) {
+    .charts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+    }
+
+    .chart-container {
+        height: 320px;
+    }
+}
+
+/* Desktop / Laptop (1024px - 1399px) */
+@media (max-width: 1399px) and (min-width: 1024px) {
+    .charts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .chart-card-header {
+        padding: 16px 20px;
+    }
+
+    .chart-container {
+        height: 260px;
+    }
+}
+
+/* Tablet Landscape (768px - 1023px) */
+@media (max-width: 1023px) and (min-width: 768px) {
+    .charts-page {
+        padding: 25px 15px 50px;
+    }
+
+    .charts-header h1 {
+        font-size: 1.9rem;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .chart-card-header {
+        padding: 18px 20px;
+    }
+
+    .coin-title h3 {
+        font-size: 1.2rem;
+    }
+
+    .current-price {
+        font-size: 1.4rem;
+    }
+
+    .chart-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .stat {
+        padding: 12px 10px;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+    }
+
+    .stat-value {
+        font-size: 0.85rem;
+    }
+
+    .chart-container {
+        height: 280px;
+        padding: 16px 20px;
+    }
+}
+
+/* Tablet Portrait (600px - 767px) */
+@media (max-width: 767px) and (min-width: 600px) {
+    .charts-page {
+        padding: 20px 15px 40px;
+    }
+
+    .charts-header h1 {
+        font-size: 1.7rem;
+    }
+
+    .charts-header p {
+        font-size: 1rem;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .chart-card-header {
+        padding: 16px 18px;
+    }
+
+    .coin-logo {
+        width: 36px;
+        height: 36px;
+    }
+
+    .coin-title h3 {
+        font-size: 1.1rem;
+    }
+
+    .current-price {
+        font-size: 1.3rem;
+    }
+
+    .chart-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .stat {
+        padding: 10px 6px;
+    }
+
+    .stat-label {
+        font-size: 0.65rem;
+    }
+
+    .stat-value {
+        font-size: 0.8rem;
+    }
+
+    .time-filters {
+        padding: 10px 14px;
+        gap: 6px;
+    }
+
+    .time-btn {
+        padding: 7px 12px;
+        font-size: 0.75rem;
+    }
+
+    .chart-container {
+        height: 260px;
+        padding: 14px;
+    }
+}
+
+/* Mobile Large (480px - 599px) */
+@media (max-width: 599px) and (min-width: 480px) {
+    .charts-page {
+        padding: 15px 12px 35px;
+    }
+
+    .charts-header {
+        margin-bottom: 25px;
+    }
+
+    .charts-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .charts-header p {
+        font-size: 0.9rem;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .chart-card {
+        border-radius: 12px;
+    }
+
+    .chart-card:hover {
+        transform: none;
+    }
+
+    .chart-card-header {
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 14px 16px;
+        gap: 10px;
+    }
+
+    .coin-logo {
+        width: 32px;
+        height: 32px;
+    }
+
+    .coin-title {
+        gap: 10px;
+    }
+
+    .coin-title h3 {
+        font-size: 1rem;
+    }
+
+    .coin-symbol {
+        font-size: 0.75rem;
+    }
+
+    .price-info {
+        text-align: right;
+    }
+
+    .current-price {
+        font-size: 1.15rem;
+    }
+
+    .price-change {
+        font-size: 0.75rem;
+        padding: 3px 8px;
+    }
+
+    .chart-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat {
+        padding: 10px 12px;
+    }
+
+    .stat-label {
+        font-size: 0.65rem;
+    }
+
+    .stat-value {
+        font-size: 0.8rem;
+    }
+
+    .time-filters {
+        padding: 10px 12px;
+        gap: 5px;
+        justify-content: space-between;
+    }
+
+    .time-btn {
+        padding: 6px 10px;
+        font-size: 0.7rem;
+        flex: 1;
+        text-align: center;
+    }
+
+    .chart-container {
+        height: 220px;
+        padding: 12px;
+    }
+
+    .chart-footer {
+        padding: 8px 12px;
+    }
+
+    .chart-info {
+        font-size: 0.7rem;
+    }
+
+    .data-source {
+        font-size: 0.65rem;
+    }
+}
+
+/* Mobile Small (320px - 479px) */
+@media (max-width: 479px) {
+    .charts-page {
+        padding: 12px 10px 30px;
+    }
+
+    .charts-header {
+        margin-bottom: 20px;
+    }
+
+    .charts-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .charts-header p {
+        font-size: 0.85rem;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .chart-card {
+        border-radius: 10px;
+    }
+
+    .chart-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .chart-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px 14px;
+        gap: 10px;
+    }
+
+    .coin-logo {
+        width: 30px;
+        height: 30px;
+    }
+
+    .coin-title {
+        gap: 8px;
+    }
+
+    .coin-title h3 {
+        font-size: 0.95rem;
+    }
+
+    .coin-symbol {
+        font-size: 0.7rem;
+    }
+
+    .price-info {
+        text-align: left;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .current-price {
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .price-change {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+
+    .chart-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat {
+        padding: 8px 10px;
+    }
+
+    .stat-label {
+        font-size: 0.6rem;
+        letter-spacing: 0;
+    }
+
+    .stat-value {
+        font-size: 0.75rem;
+    }
+
+    .time-filters {
+        padding: 8px 10px;
+        gap: 4px;
+        justify-content: space-between;
+    }
+
+    .time-btn {
+        padding: 5px 8px;
+        font-size: 0.65rem;
+        border-radius: 6px;
+        flex: 1;
+        text-align: center;
+        min-width: 0;
+    }
+
+    .chart-container {
+        height: 200px;
+        padding: 10px;
+    }
+
+    .chart-footer {
+        padding: 8px 10px;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .chart-info {
+        font-size: 0.65rem;
+        gap: 5px;
+    }
+
+    .info-dot {
+        width: 6px;
+        height: 6px;
+    }
+
+    .data-source {
+        font-size: 0.6rem;
+    }
+}
+
+/* Extra Small Mobile (below 320px) */
+@media (max-width: 319px) {
+    .charts-page {
+        padding: 10px 8px 25px;
+    }
+
+    .charts-header h1 {
+        font-size: 1.1rem;
+    }
+
+    .charts-header p {
+        font-size: 0.8rem;
+    }
+
+    .chart-card-header {
+        padding: 10px 12px;
+    }
+
+    .coin-logo {
+        width: 26px;
+        height: 26px;
+    }
+
+    .coin-title h3 {
+        font-size: 0.85rem;
+    }
+
+    .current-price {
+        font-size: 1rem;
+    }
+
+    .stat {
+        padding: 6px 8px;
+    }
+
+    .stat-label {
+        font-size: 0.55rem;
+    }
+
+    .stat-value {
+        font-size: 0.7rem;
+    }
+
+    .time-btn {
+        padding: 4px 6px;
+        font-size: 0.6rem;
+    }
+
+    .chart-container {
+        height: 180px;
+        padding: 8px;
+    }
+}
