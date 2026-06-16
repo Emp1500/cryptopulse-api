@@ -3,6 +3,7 @@ const router = express.Router();
 const axios = require('axios');
 const { body, validationResult } = require('express-validator');
 const { isAuthenticated } = require('../middleware/auth');
+const supabase = require('../config/database');
 
 const holdingValidation = [
   body('coinId').trim().notEmpty().withMessage('coinId is required'),
@@ -24,99 +25,9 @@ const watchlistValidation = [
   body('symbol').trim().notEmpty().withMessage('symbol is required')
 ];
 
-// Mock portfolio data (will be replaced by database in Phase 5)
-// Using a Map to store portfolios by user ID
-const mockPortfolios = new Map();
-
-// Mock watchlist data (will be replaced by database in Phase 5)
-const mockWatchlists = new Map();
-
-// Initialize demo user watchlist
-mockWatchlists.set(1, {
-  coins: [
-    {
-      coinId: 'cardano',
-      symbol: 'ADA',
-      name: 'Cardano',
-      image: 'https://assets.coingecko.com/coins/images/975/large/cardano.png',
-      addedAt: '2024-03-01'
-    },
-    {
-      coinId: 'polkadot',
-      symbol: 'DOT',
-      name: 'Polkadot',
-      image: 'https://assets.coingecko.com/coins/images/12171/large/polkadot.png',
-      addedAt: '2024-03-05'
-    },
-    {
-      coinId: 'avalanche-2',
-      symbol: 'AVAX',
-      name: 'Avalanche',
-      image: 'https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png',
-      addedAt: '2024-03-10'
-    }
-  ]
-});
-
-// Initialize demo user portfolio
-mockPortfolios.set(1, {
-  holdings: [
-    {
-      id: 1,
-      coinId: 'bitcoin',
-      symbol: 'BTC',
-      name: 'Bitcoin',
-      image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
-      quantity: 0.5,
-      purchasePrice: 42000,
-      purchaseDate: '2024-01-15',
-      notes: 'First BTC purchase'
-    },
-    {
-      id: 2,
-      coinId: 'ethereum',
-      symbol: 'ETH',
-      name: 'Ethereum',
-      image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
-      quantity: 3.2,
-      purchasePrice: 2800,
-      purchaseDate: '2024-02-20',
-      notes: ''
-    },
-    {
-      id: 3,
-      coinId: 'solana',
-      symbol: 'SOL',
-      name: 'Solana',
-      image: 'https://assets.coingecko.com/coins/images/4128/large/solana.png',
-      quantity: 15,
-      purchasePrice: 85,
-      purchaseDate: '2024-03-10',
-      notes: 'Long term hold'
-    }
-  ]
-});
-
-// Helper function to get user portfolio
-function getUserPortfolio(userId) {
-  if (!mockPortfolios.has(userId)) {
-    mockPortfolios.set(userId, { holdings: [] });
-  }
-  return mockPortfolios.get(userId);
-}
-
-// Helper function to get user watchlist
-function getUserWatchlist(userId) {
-  if (!mockWatchlists.has(userId)) {
-    mockWatchlists.set(userId, { coins: [] });
-  }
-  return mockWatchlists.get(userId);
-}
-
-// Helper function to fetch current prices
+// Helper: fetch current prices from CoinGecko
 async function fetchCurrentPrices(coinIds) {
   if (coinIds.length === 0) return {};
-
   try {
     const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
       params: {
@@ -132,32 +43,66 @@ async function fetchCurrentPrices(coinIds) {
   }
 }
 
-// GET /portfolio - Dashboard page
+// Helper: fetch detailed coin data for watchlist
+async function fetchWatchlistData(coinIds) {
+  if (coinIds.length === 0) return new Map();
+  try {
+    const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
+      params: {
+        vs_currency: 'usd',
+        ids: coinIds.join(','),
+        price_change_percentage: '7d',
+        sparkline: false
+      }
+    });
+    const coinDataMap = new Map();
+    response.data.forEach(coin => coinDataMap.set(coin.id, coin));
+    return coinDataMap;
+  } catch (error) {
+    console.error('Error fetching watchlist data:', error.message);
+    return new Map();
+  }
+}
+
+// ==================== PORTFOLIO ROUTES ====================
+
+// GET /portfolio - Dashboard
 router.get('/', isAuthenticated, async (req, res) => {
   const userId = req.session.user.id;
-  const portfolio = getUserPortfolio(userId);
 
-  // Get current prices for all holdings
-  const coinIds = portfolio.holdings.map(h => h.coinId);
+  const { data: holdings, error } = await supabase
+    .from('portfolio_holdings')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Portfolio fetch error:', error.message);
+    return res.status(500).send('Failed to load portfolio');
+  }
+
+  const coinIds = holdings.map(h => h.coin_id);
   const prices = await fetchCurrentPrices(coinIds);
 
-  // Calculate portfolio metrics
   let totalValue = 0;
   let totalInvested = 0;
 
-  const holdingsWithPrices = portfolio.holdings.map(holding => {
-    const currentPrice = prices[holding.coinId]?.usd || holding.purchasePrice;
-    const priceChange24h = prices[holding.coinId]?.usd_24h_change || 0;
-    const currentValue = holding.quantity * currentPrice;
-    const investedValue = holding.quantity * holding.purchasePrice;
+  const holdingsWithPrices = holdings.map(holding => {
+    const currentPrice = prices[holding.coin_id]?.usd || Number(holding.purchase_price);
+    const priceChange24h = prices[holding.coin_id]?.usd_24h_change || 0;
+    const currentValue = Number(holding.quantity) * currentPrice;
+    const investedValue = Number(holding.quantity) * Number(holding.purchase_price);
     const profitLoss = currentValue - investedValue;
-    const profitLossPercent = ((currentPrice - holding.purchasePrice) / holding.purchasePrice) * 100;
+    const profitLossPercent = ((currentPrice - Number(holding.purchase_price)) / Number(holding.purchase_price)) * 100;
 
     totalValue += currentValue;
     totalInvested += investedValue;
 
     return {
       ...holding,
+      coinId: holding.coin_id,
+      purchasePrice: Number(holding.purchase_price),
+      purchaseDate: holding.purchase_date,
       currentPrice,
       priceChange24h,
       currentValue,
@@ -179,22 +124,30 @@ router.get('/', isAuthenticated, async (req, res) => {
   });
 });
 
-// GET /portfolio/holdings - Get holdings as JSON
+// GET /portfolio/holdings - JSON
 router.get('/holdings', isAuthenticated, async (req, res) => {
   const userId = req.session.user.id;
-  const portfolio = getUserPortfolio(userId);
 
-  const coinIds = portfolio.holdings.map(h => h.coinId);
+  const { data: holdings, error } = await supabase
+    .from('portfolio_holdings')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true });
+
+  if (error) return res.status(500).json({ error: 'Failed to fetch holdings' });
+
+  const coinIds = holdings.map(h => h.coin_id);
   const prices = await fetchCurrentPrices(coinIds);
 
-  const holdingsWithPrices = portfolio.holdings.map(holding => {
-    const currentPrice = prices[holding.coinId]?.usd || holding.purchasePrice;
-    const priceChange24h = prices[holding.coinId]?.usd_24h_change || 0;
-    const currentValue = holding.quantity * currentPrice;
-    const profitLossPercent = ((currentPrice - holding.purchasePrice) / holding.purchasePrice) * 100;
-
+  const holdingsWithPrices = holdings.map(holding => {
+    const currentPrice = prices[holding.coin_id]?.usd || Number(holding.purchase_price);
+    const priceChange24h = prices[holding.coin_id]?.usd_24h_change || 0;
+    const currentValue = Number(holding.quantity) * currentPrice;
+    const profitLossPercent = ((currentPrice - Number(holding.purchase_price)) / Number(holding.purchase_price)) * 100;
     return {
       ...holding,
+      coinId: holding.coin_id,
+      purchasePrice: Number(holding.purchase_price),
       currentPrice,
       priceChange24h,
       currentValue,
@@ -205,8 +158,8 @@ router.get('/holdings', isAuthenticated, async (req, res) => {
   res.json(holdingsWithPrices);
 });
 
-// POST /portfolio/holdings - Add new holding
-router.post('/holdings', isAuthenticated, holdingValidation, (req, res) => {
+// POST /portfolio/holdings - Add holding
+router.post('/holdings', isAuthenticated, holdingValidation, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({ error: errors.array()[0].msg });
@@ -215,140 +168,136 @@ router.post('/holdings', isAuthenticated, holdingValidation, (req, res) => {
   const userId = req.session.user.id;
   const { coinId, symbol, name, image, quantity, purchasePrice, purchaseDate, notes } = req.body;
 
-  const portfolio = getUserPortfolio(userId);
+  const { data, error } = await supabase
+    .from('portfolio_holdings')
+    .insert([{
+      user_id: userId,
+      coin_id: coinId,
+      symbol: symbol.toUpperCase(),
+      name,
+      image: image || '',
+      quantity: parseFloat(quantity),
+      purchase_price: parseFloat(purchasePrice),
+      purchase_date: purchaseDate || new Date().toISOString().split('T')[0],
+      notes: notes || ''
+    }])
+    .select()
+    .single();
 
-  // Generate new ID
-  const newId = portfolio.holdings.length > 0
-    ? Math.max(...portfolio.holdings.map(h => h.id)) + 1
-    : 1;
+  if (error) return res.status(500).json({ error: 'Failed to add holding' });
 
-  const newHolding = {
-    id: newId,
-    coinId,
-    symbol: symbol.toUpperCase(),
-    name,
-    image: image || '',
-    quantity: parseFloat(quantity),
-    purchasePrice: parseFloat(purchasePrice),
-    purchaseDate: purchaseDate || new Date().toISOString().split('T')[0],
-    notes: notes || ''
-  };
-
-  portfolio.holdings.push(newHolding);
-
-  res.json({ success: true, holding: newHolding });
+  res.json({ success: true, holding: data });
 });
 
 // PUT /portfolio/holdings/:id - Update holding
-router.put('/holdings/:id', isAuthenticated, holdingUpdateValidation, (req, res) => {
+router.put('/holdings/:id', isAuthenticated, holdingUpdateValidation, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({ error: errors.array()[0].msg });
   }
 
   const userId = req.session.user.id;
-  const holdingId = parseInt(req.params.id);
+  const holdingId = req.params.id;
   const { quantity, purchasePrice, purchaseDate, notes } = req.body;
 
-  const portfolio = getUserPortfolio(userId);
-  const holdingIndex = portfolio.holdings.findIndex(h => h.id === holdingId);
+  const updates = {};
+  if (quantity !== undefined) updates.quantity = parseFloat(quantity);
+  if (purchasePrice !== undefined) updates.purchase_price = parseFloat(purchasePrice);
+  if (purchaseDate !== undefined) updates.purchase_date = purchaseDate;
+  if (notes !== undefined) updates.notes = notes;
 
-  if (holdingIndex === -1) {
-    return res.status(404).json({ error: 'Holding not found' });
-  }
+  const { data, error } = await supabase
+    .from('portfolio_holdings')
+    .update(updates)
+    .eq('id', holdingId)
+    .eq('user_id', userId)
+    .select()
+    .single();
 
-  // Update fields
-  if (quantity !== undefined) portfolio.holdings[holdingIndex].quantity = parseFloat(quantity);
-  if (purchasePrice !== undefined) portfolio.holdings[holdingIndex].purchasePrice = parseFloat(purchasePrice);
-  if (purchaseDate !== undefined) portfolio.holdings[holdingIndex].purchaseDate = purchaseDate;
-  if (notes !== undefined) portfolio.holdings[holdingIndex].notes = notes;
+  if (error || !data) return res.status(404).json({ error: 'Holding not found' });
 
-  res.json({ success: true, holding: portfolio.holdings[holdingIndex] });
+  res.json({ success: true, holding: data });
 });
 
 // DELETE /portfolio/holdings/:id - Delete holding
-router.delete('/holdings/:id', isAuthenticated, (req, res) => {
+router.delete('/holdings/:id', isAuthenticated, async (req, res) => {
   const userId = req.session.user.id;
-  const holdingId = parseInt(req.params.id);
+  const holdingId = req.params.id;
 
-  const portfolio = getUserPortfolio(userId);
-  const holdingIndex = portfolio.holdings.findIndex(h => h.id === holdingId);
+  const { data: existing } = await supabase
+    .from('portfolio_holdings')
+    .select('id')
+    .eq('id', holdingId)
+    .eq('user_id', userId)
+    .single();
 
-  if (holdingIndex === -1) {
-    return res.status(404).json({ error: 'Holding not found' });
-  }
+  if (!existing) return res.status(404).json({ error: 'Holding not found' });
 
-  portfolio.holdings.splice(holdingIndex, 1);
+  const { error } = await supabase
+    .from('portfolio_holdings')
+    .delete()
+    .eq('id', holdingId)
+    .eq('user_id', userId);
+
+  if (error) return res.status(500).json({ error: 'Failed to delete holding' });
 
   res.json({ success: true });
 });
 
 // ==================== WATCHLIST ROUTES ====================
 
-// Helper function to fetch detailed coin data for watchlist
-async function fetchWatchlistData(coinIds) {
-  if (coinIds.length === 0) return new Map();
-
-  try {
-    const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
-      params: {
-        vs_currency: 'usd',
-        ids: coinIds.join(','),
-        price_change_percentage: '7d',
-        sparkline: false
-      }
-    });
-    // The response is an array, convert it to a map for easier lookup
-    const coinDataMap = new Map();
-    response.data.forEach(coin => {
-      coinDataMap.set(coin.id, coin);
-    });
-    return coinDataMap;
-  } catch (error) {
-    console.error('Error fetching watchlist data:', error.message);
-    return new Map();
-  }
-}
-
-// GET /portfolio/watchlist - Watchlist page
+// GET /portfolio/watchlist - Page
 router.get('/watchlist', isAuthenticated, async (req, res) => {
   const userId = req.session.user.id;
-  const watchlist = getUserWatchlist(userId);
 
-  // Get current data for all watchlist coins
-  const coinIds = watchlist.coins.map(c => c.coinId);
+  const { data: coins, error } = await supabase
+    .from('watchlist')
+    .select('*')
+    .eq('user_id', userId)
+    .order('added_at', { ascending: true });
+
+  if (error) return res.status(500).send('Failed to load watchlist');
+
+  const coinIds = coins.map(c => c.coin_id);
   const coinDataMap = await fetchWatchlistData(coinIds);
 
-  const watchlistWithData = watchlist.coins.map(coin => {
-    const data = coinDataMap.get(coin.coinId);
+  const watchlistWithData = coins.map(coin => {
+    const data = coinDataMap.get(coin.coin_id);
     return {
       ...coin,
+      coinId: coin.coin_id,
       currentPrice: data?.current_price || null,
       priceChange24h: data?.price_change_percentage_24h || 0,
       priceChange7d: data?.price_change_percentage_7d_in_currency || 0,
       marketCap: data?.market_cap || null,
       volume24h: data?.total_volume || null,
-      image: data?.image || coin.image // Use image from API if available
+      image: data?.image || coin.image
     };
   });
 
-  res.render('portfolio/watchlist', {
-    watchlist: watchlistWithData
-  });
+  res.render('portfolio/watchlist', { watchlist: watchlistWithData });
 });
 
-// GET /portfolio/watchlist/data - Get watchlist as JSON
+// GET /portfolio/watchlist/data - JSON
 router.get('/watchlist/data', isAuthenticated, async (req, res) => {
   const userId = req.session.user.id;
-  const watchlist = getUserWatchlist(userId);
 
-  const coinIds = watchlist.coins.map(c => c.coinId);
+  const { data: coins, error } = await supabase
+    .from('watchlist')
+    .select('*')
+    .eq('user_id', userId)
+    .order('added_at', { ascending: true });
+
+  if (error) return res.status(500).json({ error: 'Failed to fetch watchlist' });
+
+  const coinIds = coins.map(c => c.coin_id);
   const coinDataMap = await fetchWatchlistData(coinIds);
 
-  const watchlistWithData = watchlist.coins.map(coin => {
-    const data = coinDataMap.get(coin.coinId);
+  const watchlistWithData = coins.map(coin => {
+    const data = coinDataMap.get(coin.coin_id);
     return {
       ...coin,
+      coinId: coin.coin_id,
       currentPrice: data?.current_price || null,
       priceChange24h: data?.price_change_percentage_24h || 0,
       priceChange7d: data?.price_change_percentage_7d_in_currency || 0,
@@ -361,8 +310,8 @@ router.get('/watchlist/data', isAuthenticated, async (req, res) => {
   res.json(watchlistWithData);
 });
 
-// POST /portfolio/watchlist - Add coin to watchlist
-router.post('/watchlist', isAuthenticated, watchlistValidation, (req, res) => {
+// POST /portfolio/watchlist - Add coin
+router.post('/watchlist', isAuthenticated, watchlistValidation, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({ error: errors.array()[0].msg });
@@ -371,40 +320,49 @@ router.post('/watchlist', isAuthenticated, watchlistValidation, (req, res) => {
   const userId = req.session.user.id;
   const { coinId, name, symbol, image } = req.body;
 
-  const watchlist = getUserWatchlist(userId);
+  const { data, error } = await supabase
+    .from('watchlist')
+    .insert([{
+      user_id: userId,
+      coin_id: coinId,
+      symbol: symbol.toUpperCase(),
+      name,
+      image: image || ''
+    }])
+    .select()
+    .single();
 
-  // Check if coin already exists in watchlist
-  const exists = watchlist.coins.find(c => c.coinId === coinId);
-  if (exists) {
-    return res.status(400).json({ error: 'Coin already in watchlist' });
+  if (error) {
+    if (error.code === '23505') {
+      return res.status(400).json({ error: 'Coin already in watchlist' });
+    }
+    return res.status(500).json({ error: 'Failed to add to watchlist' });
   }
 
-  const newCoin = {
-    coinId,
-    symbol: symbol.toUpperCase(),
-    name,
-    image: image || '',
-    addedAt: new Date().toISOString().split('T')[0]
-  };
-
-  watchlist.coins.push(newCoin);
-
-  res.json({ success: true, coin: newCoin });
+  res.json({ success: true, coin: data });
 });
 
-// DELETE /portfolio/watchlist/:coinId - Remove coin from watchlist
-router.delete('/watchlist/:coinId', isAuthenticated, (req, res) => {
+// DELETE /portfolio/watchlist/:coinId - Remove coin
+router.delete('/watchlist/:coinId', isAuthenticated, async (req, res) => {
   const userId = req.session.user.id;
   const coinId = req.params.coinId;
 
-  const watchlist = getUserWatchlist(userId);
-  const coinIndex = watchlist.coins.findIndex(c => c.coinId === coinId);
+  const { data: existing } = await supabase
+    .from('watchlist')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('coin_id', coinId)
+    .single();
 
-  if (coinIndex === -1) {
-    return res.status(404).json({ error: 'Coin not found in watchlist' });
-  }
+  if (!existing) return res.status(404).json({ error: 'Coin not found in watchlist' });
 
-  watchlist.coins.splice(coinIndex, 1);
+  const { error } = await supabase
+    .from('watchlist')
+    .delete()
+    .eq('user_id', userId)
+    .eq('coin_id', coinId);
+
+  if (error) return res.status(500).json({ error: 'Failed to remove from watchlist' });
 
   res.json({ success: true });
 });

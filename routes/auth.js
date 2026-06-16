@@ -3,16 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
-
-// Mock users (will be replaced by Supabase in Layer 2)
-const mockUsers = [
-  {
-    id: 1,
-    name: 'Demo User',
-    email: 'demo@cryptopulse.com',
-    password: '$2b$10$nyybSbK1Cg3Pz3Qu4C4d3eAP6QcxI0rfdcxkSqRlAWfLvISlmOvYq' // bcrypt hash of 'demo123'
-  }
-];
+const supabase = require('../config/database');
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -54,15 +45,24 @@ router.post('/login', authLimiter, loginValidation, async (req, res) => {
   }
 
   const { email, password } = req.body;
-  const user = mockUsers.find(u => u.email === email);
-  const passwordMatch = user ? await bcrypt.compare(password, user.password) : false;
 
-  if (user && passwordMatch) {
-    req.session.user = { id: user.id, name: user.name, email: user.email };
-    return res.redirect('/portfolio');
+  const { data: user, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('email', email)
+    .single();
+
+  if (error || !user) {
+    return res.render('auth/login', { error: 'Invalid email or password', success: null });
   }
 
-  res.render('auth/login', { error: 'Invalid email or password', success: null });
+  const passwordMatch = await bcrypt.compare(password, user.password_hash);
+  if (!passwordMatch) {
+    return res.render('auth/login', { error: 'Invalid email or password', success: null });
+  }
+
+  req.session.user = { id: user.id, name: user.name, email: user.email };
+  res.redirect('/portfolio');
 });
 
 // GET /auth/register
@@ -80,14 +80,26 @@ router.post('/register', authLimiter, registerValidation, async (req, res) => {
 
   const { name, email, password } = req.body;
 
-  const existingUser = mockUsers.find(u => u.email === email);
-  if (existingUser) {
+  const { data: existing } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', email)
+    .single();
+
+  if (existing) {
     return res.render('auth/register', { error: 'Email already registered' });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const newUser = { id: mockUsers.length + 1, name, email, password: passwordHash };
-  mockUsers.push(newUser);
+
+  const { error } = await supabase
+    .from('users')
+    .insert([{ name, email, password_hash: passwordHash }]);
+
+  if (error) {
+    console.error('Register error:', error.message);
+    return res.render('auth/register', { error: 'Registration failed. Please try again.' });
+  }
 
   res.redirect('/auth/login?registered=true');
 });

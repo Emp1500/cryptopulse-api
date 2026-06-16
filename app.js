@@ -1,10 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+const { Pool } = require('pg');
 const app = express();
 const path = require('path');
 const axios = require('axios');
-const session = require('express-session');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -41,15 +43,25 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Session middleware
+// Session middleware with PostgreSQL store
+const pgPool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
 app.use(session({
+  store: new pgSession({
+    pool: pgPool,
+    tableName: 'sessions',
+    createTableIfMissing: true
+  }),
   secret: process.env.SESSION_SECRET || 'fallback-secret-key',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000
   }
 }));
 
@@ -120,8 +132,11 @@ app.get('/markets', (req, res) => {
   res.render('partials/markets');
 });
 
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
