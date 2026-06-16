@@ -1,7 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const { body, validationResult } = require('express-validator');
 const { isAuthenticated } = require('../middleware/auth');
+
+const holdingValidation = [
+  body('coinId').trim().notEmpty().withMessage('coinId is required'),
+  body('symbol').trim().notEmpty().withMessage('symbol is required'),
+  body('name').trim().notEmpty().withMessage('name is required'),
+  body('quantity').isFloat({ gt: 0 }).withMessage('quantity must be a positive number'),
+  body('purchasePrice').isFloat({ gt: 0 }).withMessage('purchasePrice must be a positive number')
+];
+
+const holdingUpdateValidation = [
+  body('quantity').optional().isFloat({ gt: 0 }).withMessage('quantity must be a positive number'),
+  body('purchasePrice').optional().isFloat({ gt: 0 }).withMessage('purchasePrice must be a positive number'),
+  body('purchaseDate').optional().isISO8601().withMessage('purchaseDate must be a valid date')
+];
+
+const watchlistValidation = [
+  body('coinId').trim().notEmpty().withMessage('coinId is required'),
+  body('name').trim().notEmpty().withMessage('name is required'),
+  body('symbol').trim().notEmpty().withMessage('symbol is required')
+];
 
 // Mock portfolio data (will be replaced by database in Phase 5)
 // Using a Map to store portfolios by user ID
@@ -185,14 +206,14 @@ router.get('/holdings', isAuthenticated, async (req, res) => {
 });
 
 // POST /portfolio/holdings - Add new holding
-router.post('/holdings', isAuthenticated, (req, res) => {
+router.post('/holdings', isAuthenticated, holdingValidation, (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ error: errors.array()[0].msg });
+  }
+
   const userId = req.session.user.id;
   const { coinId, symbol, name, image, quantity, purchasePrice, purchaseDate, notes } = req.body;
-
-  // Validation
-  if (!coinId || !symbol || !name || !quantity || !purchasePrice) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
 
   const portfolio = getUserPortfolio(userId);
 
@@ -219,7 +240,12 @@ router.post('/holdings', isAuthenticated, (req, res) => {
 });
 
 // PUT /portfolio/holdings/:id - Update holding
-router.put('/holdings/:id', isAuthenticated, (req, res) => {
+router.put('/holdings/:id', isAuthenticated, holdingUpdateValidation, (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ error: errors.array()[0].msg });
+  }
+
   const userId = req.session.user.id;
   const holdingId = parseInt(req.params.id);
   const { quantity, purchasePrice, purchaseDate, notes } = req.body;
@@ -261,23 +287,26 @@ router.delete('/holdings/:id', isAuthenticated, (req, res) => {
 
 // Helper function to fetch detailed coin data for watchlist
 async function fetchWatchlistData(coinIds) {
-  if (coinIds.length === 0) return {};
+  if (coinIds.length === 0) return new Map();
 
   try {
-    const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+    const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
       params: {
+        vs_currency: 'usd',
         ids: coinIds.join(','),
-        vs_currencies: 'usd',
-        include_24hr_change: true,
-        include_7d_change: true,
-        include_market_cap: true,
-        include_24hr_vol: true
+        price_change_percentage: '7d',
+        sparkline: false
       }
     });
-    return response.data;
+    // The response is an array, convert it to a map for easier lookup
+    const coinDataMap = new Map();
+    response.data.forEach(coin => {
+      coinDataMap.set(coin.id, coin);
+    });
+    return coinDataMap;
   } catch (error) {
     console.error('Error fetching watchlist data:', error.message);
-    return {};
+    return new Map();
   }
 }
 
@@ -288,17 +317,18 @@ router.get('/watchlist', isAuthenticated, async (req, res) => {
 
   // Get current data for all watchlist coins
   const coinIds = watchlist.coins.map(c => c.coinId);
-  const coinData = await fetchWatchlistData(coinIds);
+  const coinDataMap = await fetchWatchlistData(coinIds);
 
   const watchlistWithData = watchlist.coins.map(coin => {
-    const data = coinData[coin.coinId] || {};
+    const data = coinDataMap.get(coin.coinId);
     return {
       ...coin,
-      currentPrice: data.usd || null,
-      priceChange24h: data.usd_24h_change || 0,
-      priceChange7d: data.usd_7d_change || 0,
-      marketCap: data.usd_market_cap || null,
-      volume24h: data.usd_24h_vol || null
+      currentPrice: data?.current_price || null,
+      priceChange24h: data?.price_change_percentage_24h || 0,
+      priceChange7d: data?.price_change_percentage_7d_in_currency || 0,
+      marketCap: data?.market_cap || null,
+      volume24h: data?.total_volume || null,
+      image: data?.image || coin.image // Use image from API if available
     };
   });
 
@@ -313,17 +343,18 @@ router.get('/watchlist/data', isAuthenticated, async (req, res) => {
   const watchlist = getUserWatchlist(userId);
 
   const coinIds = watchlist.coins.map(c => c.coinId);
-  const coinData = await fetchWatchlistData(coinIds);
+  const coinDataMap = await fetchWatchlistData(coinIds);
 
   const watchlistWithData = watchlist.coins.map(coin => {
-    const data = coinData[coin.coinId] || {};
+    const data = coinDataMap.get(coin.coinId);
     return {
       ...coin,
-      currentPrice: data.usd || null,
-      priceChange24h: data.usd_24h_change || 0,
-      priceChange7d: data.usd_7d_change || 0,
-      marketCap: data.usd_market_cap || null,
-      volume24h: data.usd_24h_vol || null
+      currentPrice: data?.current_price || null,
+      priceChange24h: data?.price_change_percentage_24h || 0,
+      priceChange7d: data?.price_change_percentage_7d_in_currency || 0,
+      marketCap: data?.market_cap || null,
+      volume24h: data?.total_volume || null,
+      image: data?.image || coin.image
     };
   });
 
@@ -331,14 +362,14 @@ router.get('/watchlist/data', isAuthenticated, async (req, res) => {
 });
 
 // POST /portfolio/watchlist - Add coin to watchlist
-router.post('/watchlist', isAuthenticated, (req, res) => {
+router.post('/watchlist', isAuthenticated, watchlistValidation, (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ error: errors.array()[0].msg });
+  }
+
   const userId = req.session.user.id;
   const { coinId, name, symbol, image } = req.body;
-
-  // Validation
-  if (!coinId || !name || !symbol) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
 
   const watchlist = getUserWatchlist(userId);
 

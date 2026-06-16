@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const helmet = require('helmet');
 const app = express();
 const path = require('path');
 const axios = require('axios');
@@ -18,6 +19,20 @@ const cache = {
 
 // Cache duration: 5 minutes in milliseconds
 const CACHE_DURATION = 5 * 60 * 1000;
+
+// Security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdnjs.cloudflare.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com", "cdnjs.cloudflare.com"],
+      fontSrc: ["'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com"],
+      imgSrc: ["'self'", "data:", "assets.coingecko.com", "coin-images.coingecko.com"],
+      connectSrc: ["'self'"]
+    }
+  }
+}));
 
 // Middleware
 app.set('view engine', 'ejs');
