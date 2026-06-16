@@ -6,7 +6,8 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "build": "echo \"No build required\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --forceExit",
+    "test:watch": "jest --watch --forceExit"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +29,8 @@
     "pg": "^8.21.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.10",
+    "supertest": "^7.2.2"
   }
 }

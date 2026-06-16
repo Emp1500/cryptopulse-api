@@ -43,18 +43,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Session middleware with PostgreSQL store
-const pgPool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-
-app.use(session({
-  store: new pgSession({
-    pool: pgPool,
-    tableName: 'sessions',
-    createTableIfMissing: true
-  }),
+// Session middleware — uses PostgreSQL store in production, in-memory for tests
+const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'fallback-secret-key',
   resave: false,
   saveUninitialized: false,
@@ -63,7 +53,21 @@ app.use(session({
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000
   }
-}));
+};
+
+if (process.env.DATABASE_URL) {
+  const pgPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+  });
+  sessionConfig.store = new pgSession({
+    pool: pgPool,
+    tableName: 'sessions',
+    createTableIfMissing: true
+  });
+}
+
+app.use(session(sessionConfig));
 
 // Make user available to all views
 app.use((req, res, next) => {
