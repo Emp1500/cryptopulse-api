@@ -14,6 +14,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@sentry/node": "^10.58.0",
     "@supabase/supabase-js": "^2.108.2",
     "axios": "^1.11.0",
     "bcryptjs": "^3.0.3",

@@ -1,4 +1,12 @@
 require('dotenv').config();
+const Sentry = require('@sentry/node');
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV || 'development',
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0
+});
+
 const express = require('express');
 const helmet = require('helmet');
 const session = require('express-session');
@@ -136,6 +144,8 @@ app.get('/about', (req, res) => {
 app.get('/markets', (req, res) => {
   res.render('partials/markets');
 });
+
+Sentry.setupExpressErrorHandler(app);
 
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
