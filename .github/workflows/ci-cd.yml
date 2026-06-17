@@ -30,6 +30,8 @@ jobs:
           NODE_ENV: test
           SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_KEY }}
+          TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          TEST_SUPABASE_SERVICE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_KEY }}
           DATABASE_URL: ''
           SESSION_SECRET: ci-test-secret-key-not-for-production
           SENTRY_DSN: ''
