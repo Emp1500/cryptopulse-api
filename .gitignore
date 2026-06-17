@@ -27,5 +27,3 @@ npm-debug.log*
 
 # Other sensitive stuff
 credentials.json
-
-.github/
