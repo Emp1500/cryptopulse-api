@@ -7,6 +7,7 @@ const { Pool } = require('pg');
 const app = express();
 const path = require('path');
 const axios = require('axios');
+const logger = require('./config/logger');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -85,11 +86,11 @@ app.get('/', async (req, res) => {
   try {
     const now = Date.now();
     if (cache.coins && (now - cache.lastFetch < CACHE_DURATION)) {
-      console.log('Serving data from cache');
+      logger.info('Serving homepage data from cache');
       return res.render('index', { coins: cache.coins });
     }
 
-    console.log('Fetching new data from CoinGecko API');
+    logger.info('Fetching fresh homepage data from CoinGecko API');
     const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
       params: {
         vs_currency: 'usd',
@@ -107,9 +108,9 @@ app.get('/', async (req, res) => {
 
     return res.render('index', { coins });
   } catch (error) {
-    console.error('Error fetching data for homepage:', error.message);
+    logger.error(`Homepage CoinGecko fetch failed: ${error.message}`);
     if (cache.coins) {
-      console.log('API error: serving stale data from cache');
+      logger.warn('CoinGecko API error — serving stale cache for homepage');
       return res.render('index', { coins: cache.coins });
     }
     return res.status(500).send('Internal Server Error');
@@ -139,7 +140,7 @@ app.get('/markets', (req, res) => {
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    logger.info(`Server running at http://localhost:${PORT}`);
   });
 }
 

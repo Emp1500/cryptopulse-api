@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const supabase = require('../config/database');
+const logger = require('../config/logger');
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -97,7 +98,7 @@ router.post('/register', authLimiter, registerValidation, async (req, res) => {
     .insert([{ name, email, password_hash: passwordHash }]);
 
   if (error) {
-    console.error('Register error:', error.message);
+    logger.error(`Registration DB error: ${error.message}`);
     return res.render('auth/register', { error: 'Registration failed. Please try again.' });
   }
 
@@ -107,7 +108,7 @@ router.post('/register', authLimiter, registerValidation, async (req, res) => {
 // POST /auth/logout
 router.post('/logout', (req, res) => {
   req.session.destroy((err) => {
-    if (err) console.error('Error destroying session:', err);
+    if (err) logger.error(`Session destroy error: ${err}`);
     res.redirect('/');
   });
 });
@@ -115,7 +116,7 @@ router.post('/logout', (req, res) => {
 // GET /auth/logout (for link clicks)
 router.get('/logout', (req, res) => {
   req.session.destroy((err) => {
-    if (err) console.error('Error destroying session:', err);
+    if (err) logger.error(`Session destroy error: ${err}`);
     res.redirect('/');
   });
 });

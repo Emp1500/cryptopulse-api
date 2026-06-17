@@ -1,11 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
+const logger = require('../config/logger');
 
 // Cache for coin list
 let coinListCache = null;
 let coinListCacheTime = 0;
 const COIN_LIST_CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+
+// Cache for markets data
+let marketsCache = null;
+let marketsCacheTime = 0;
+const MARKETS_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // GET /api/coins/search - Search coins for autocomplete
 router.get('/coins/search', async (req, res) => {
@@ -19,7 +25,7 @@ router.get('/coins/search', async (req, res) => {
     // Check cache
     const now = Date.now();
     if (!coinListCache || (now - coinListCacheTime > COIN_LIST_CACHE_DURATION)) {
-      console.log('Fetching coin list from CoinGecko');
+      logger.info('Fetching coin list from CoinGecko');
       const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
         params: {
           vs_currency: 'usd',
@@ -50,8 +56,38 @@ router.get('/coins/search', async (req, res) => {
 
     res.json(filtered);
   } catch (error) {
-    console.error('Error searching coins:', error.message);
+    logger.error(`Coin search failed: ${error.message}`);
     res.status(500).json({ error: 'Failed to search coins' });
+  }
+});
+
+// GET /api/markets - Get top 100 coins for market page
+router.get('/markets', async (req, res) => {
+  try {
+    const now = Date.now();
+    if (marketsCache && (now - marketsCacheTime < MARKETS_CACHE_DURATION)) {
+      logger.info('Serving markets data from cache');
+      return res.json(marketsCache);
+    }
+
+    logger.info('Fetching fresh markets data from CoinGecko API');
+    const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
+      params: {
+        vs_currency: 'usd',
+        order: 'market_cap_desc',
+        per_page: 100,
+        page: 1,
+        sparkline: false
+      }
+    });
+
+    marketsCache = response.data;
+    marketsCacheTime = now;
+
+    res.json(marketsCache);
+  } catch (error) {
+    logger.error(`Markets data fetch failed: ${error.message}`);
+    res.status(500).json({ error: 'Failed to fetch market data' });
   }
 });
 
@@ -69,7 +105,7 @@ router.get('/coins/price/:id', async (req, res) => {
 
     res.json(response.data);
   } catch (error) {
-    console.error('Error fetching price:', error.message);
+    logger.error(`Price fetch failed: ${error.message}`);
     res.status(500).json({ error: 'Failed to fetch price' });
   }
 });

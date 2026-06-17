@@ -4,6 +4,7 @@ const axios = require('axios');
 const { body, validationResult } = require('express-validator');
 const { isAuthenticated } = require('../middleware/auth');
 const supabase = require('../config/database');
+const logger = require('../config/logger');
 
 const holdingValidation = [
   body('coinId').trim().notEmpty().withMessage('coinId is required'),
@@ -38,7 +39,7 @@ async function fetchCurrentPrices(coinIds) {
     });
     return response.data;
   } catch (error) {
-    console.error('Error fetching prices:', error.message);
+    logger.warn(`CoinGecko price fetch failed: ${error.message}`);
     return {};
   }
 }
@@ -59,7 +60,7 @@ async function fetchWatchlistData(coinIds) {
     response.data.forEach(coin => coinDataMap.set(coin.id, coin));
     return coinDataMap;
   } catch (error) {
-    console.error('Error fetching watchlist data:', error.message);
+    logger.warn(`CoinGecko watchlist data fetch failed: ${error.message}`);
     return new Map();
   }
 }
@@ -77,7 +78,7 @@ router.get('/', isAuthenticated, async (req, res) => {
     .order('created_at', { ascending: true });
 
   if (error) {
-    console.error('Portfolio fetch error:', error.message);
+    logger.error(`Portfolio holdings fetch failed: ${error.message}`);
     return res.status(500).send('Failed to load portfolio');
   }
 
