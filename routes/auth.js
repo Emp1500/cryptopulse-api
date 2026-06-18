@@ -63,7 +63,13 @@ router.post('/login', authLimiter, loginValidation, async (req, res) => {
   }
 
   req.session.user = { id: user.id, name: user.name, email: user.email };
-  res.redirect('/portfolio');
+  req.session.save((err) => {
+    if (err) {
+      logger.error(`Session save error on login: ${err}`);
+      return res.render('auth/login', { error: 'Login failed. Please try again.', success: null });
+    }
+    res.redirect('/portfolio');
+  });
 });
 
 // GET /auth/register
@@ -102,7 +108,10 @@ router.post('/register', authLimiter, registerValidation, async (req, res) => {
     return res.render('auth/register', { error: 'Registration failed. Please try again.' });
   }
 
-  res.redirect('/auth/login?registered=true');
+  req.session.save((err) => {
+    if (err) logger.error(`Session save error on register: ${err}`);
+    res.redirect('/auth/login?registered=true');
+  });
 });
 
 // POST /auth/logout
