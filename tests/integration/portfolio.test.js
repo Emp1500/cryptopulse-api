@@ -1,7 +1,7 @@
 require('dotenv').config();
 const request = require('supertest');
 const app = require('../../app');
-const { testSupabase, createTestUser, cleanTestUsers, createTestHolding } = require('../helpers/db');
+const { testSupabase, createTestUser, cleanTestUsers, createTestHolding, createTestWatchlistCoin } = require('../helpers/db');
 
 let agent;
 let testUser;
@@ -14,6 +14,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await testSupabase.from('portfolio_holdings').delete().eq('user_id', testUser.id);
+  await testSupabase.from('watchlist').delete().eq('user_id', testUser.id);
   await cleanTestUsers();
 });
 
@@ -27,6 +28,13 @@ describe('GET /portfolio', () => {
   test('returns 200 for authenticated users', async () => {
     const res = await agent.get('/portfolio');
     expect(res.status).toBe(200);
+  });
+
+  test('renders page with watchlist data available', async () => {
+    await createTestWatchlistCoin(testUser.id, { coin_id: 'ethereum', symbol: 'ETH', name: 'Ethereum' });
+    const res = await agent.get('/portfolio');
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('Ethereum');
   });
 });
 

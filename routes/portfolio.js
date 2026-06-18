@@ -71,19 +71,30 @@ async function fetchWatchlistData(coinIds) {
 router.get('/', isAuthenticated, async (req, res) => {
   const userId = req.session.user.id;
 
-  const { data: holdings, error } = await supabase
-    .from('portfolio_holdings')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true });
+  const [holdingsResult, watchlistResult] = await Promise.all([
+    supabase.from('portfolio_holdings').select('*').eq('user_id', userId).order('created_at', { ascending: true }),
+    supabase.from('watchlist').select('*').eq('user_id', userId).order('added_at', { ascending: true })
+  ]);
 
-  if (error) {
-    logger.error(`Portfolio holdings fetch failed: ${error.message}`);
+  if (holdingsResult.error) {
+    logger.error(`Portfolio holdings fetch failed: ${holdingsResult.error.message}`);
+    return res.status(500).send('Failed to load portfolio');
+  }
+  if (watchlistResult.error) {
+    logger.error(`Watchlist fetch failed: ${watchlistResult.error.message}`);
     return res.status(500).send('Failed to load portfolio');
   }
 
-  const coinIds = holdings.map(h => h.coin_id);
-  const prices = await fetchCurrentPrices(coinIds);
+  const holdings = holdingsResult.data;
+  const watchlistCoins = watchlistResult.data;
+
+  const holdingCoinIds = holdings.map(h => h.coin_id);
+  const watchlistCoinIds = watchlistCoins.map(c => c.coin_id);
+
+  const [prices, coinDataMap] = await Promise.all([
+    fetchCurrentPrices(holdingCoinIds),
+    fetchWatchlistData(watchlistCoinIds)
+  ]);
 
   let totalValue = 0;
   let totalInvested = 0;
@@ -116,12 +127,28 @@ router.get('/', isAuthenticated, async (req, res) => {
   const totalProfitLoss = totalValue - totalInvested;
   const totalProfitLossPercent = totalInvested > 0 ? ((totalProfitLoss / totalInvested) * 100) : 0;
 
+  const watchlist = watchlistCoins.map(coin => {
+    const data = coinDataMap.get(coin.coin_id);
+    return {
+      ...coin,
+      coinId: coin.coin_id,
+      currentPrice: data?.current_price || null,
+      priceChange24h: data?.price_change_percentage_24h || 0,
+      priceChange7d: data?.price_change_percentage_7d_in_currency || 0,
+      marketCap: data?.market_cap || null,
+      volume24h: data?.total_volume || null,
+      image: data?.image || coin.image
+    };
+  });
+
   res.render('portfolio/dashboard', {
+    user: req.session.user,
     holdings: holdingsWithPrices,
     totalValue,
     totalInvested,
     totalProfitLoss,
-    totalProfitLossPercent
+    totalProfitLossPercent,
+    watchlist
   });
 });
 
