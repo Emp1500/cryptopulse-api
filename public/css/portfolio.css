@@ -241,11 +241,14 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.7);
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     padding: 20px;
+}
+.modal-overlay.active {
+    display: flex;
 }
 
 .modal-content {
@@ -985,3 +988,75 @@
   flex-shrink: 0;
 }
 .wl-remove-btn:hover { color: #ef4444; }
+
+/* ── New modal form aliases ──────────────────────── */
+.form-label {
+  display: block;
+  color: var(--card-foreground);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.form-input {
+  width: 100%;
+  padding: 12px 15px;
+  background: var(--input);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--foreground);
+  font-size: 1rem;
+  font-family: var(--font-sans);
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.2);
+}
+.form-input::placeholder { color: var(--muted-foreground); }
+
+.form-error {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.btn-submit {
+  flex: 1;
+  padding: 12px;
+  background: linear-gradient(135deg, var(--primary) 0%, #d97706 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: opacity 0.2s;
+}
+.btn-submit:hover { opacity: 0.9; }
+
+/* ── Chart cards (Overview tab) ──────────────────── */
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+}
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.chart-title {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+  font-weight: 600;
+  margin: 0;
+}
+.chart-body {
+  position: relative;
+  height: 280px;
+}

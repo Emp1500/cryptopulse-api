@@ -1,472 +1,837 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio - CryptoPulse</title>
-    <link rel="stylesheet" href="/css/theme.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/other.css">
-    <link rel="stylesheet" href="/css/portfolio.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - CryptoPulse</title>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/other.css">
+  <link rel="stylesheet" href="/css/portfolio.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <%- include('../partials/header') %>
+  <%- include('../partials/header') %>
 
-    <div class="portfolio-container">
-        <!-- Portfolio Header -->
-        <div class="portfolio-header">
-            <div>
-                <h1>My Portfolio</h1>
-                <p>Track and manage your cryptocurrency investments</p>
-            </div>
-            <button class="btn-add-holding" onclick="openAddModal()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Add Holding
-            </button>
+  <div class="portfolio-container">
+
+    <!-- Page header -->
+    <div class="portfolio-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Track and manage your cryptocurrency portfolio</p>
+      </div>
+      <button class="btn-add-holding" id="btnAddHolding">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Add Holding
+      </button>
+    </div>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav" role="tablist">
+      <button class="tab-btn active" data-tab="overview" role="tab">Overview</button>
+      <button class="tab-btn" data-tab="holdings" role="tab">Holdings</button>
+      <button class="tab-btn" data-tab="analytics" role="tab">Analytics</button>
+      <button class="tab-btn" data-tab="watchlist" role="tab">Watchlist</button>
+    </nav>
+
+    <!-- ══════════════ OVERVIEW TAB ══════════════ -->
+    <div class="tab-panel active" id="panel-overview">
+
+      <% if (holdings.length === 0) { %>
+        <div class="onboarding-card animate-in">
+          <svg class="onboard-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3>Add your first coin to start tracking</h3>
+          <p>Add a cryptocurrency holding to see your portfolio value, profit/loss, and analytics.</p>
+          <button class="btn-add-holding" id="btnOnboardAdd">Add Holding &rarr;</button>
         </div>
 
-        <!-- Portfolio Summary Cards -->
+      <% } else { %>
+
+        <!-- Summary Cards -->
         <div class="summary-cards animate-in">
-            <div class="summary-card">
-                <div class="summary-label">Total Value</div>
-                <div class="summary-value">$<%= totalValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+          <div class="summary-card">
+            <div class="summary-label">Portfolio Value</div>
+            <div class="summary-value">$<%= totalValue.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) %></div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">Total Invested</div>
+            <div class="summary-value">$<%= totalInvested.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) %></div>
+          </div>
+          <div class="summary-card <%= totalProfitLoss >= 0 ? 'profit' : 'loss' %>">
+            <div class="summary-label">Profit / Loss</div>
+            <div class="summary-value">
+              <%= totalProfitLoss >= 0 ? '+' : '' %>$<%= Math.abs(totalProfitLoss).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) %>
             </div>
-            <div class="summary-card">
-                <div class="summary-label">Total Invested</div>
-                <div class="summary-value">$<%= totalInvested.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
+          </div>
+          <div class="summary-card <%= totalProfitLossPercent >= 0 ? 'profit' : 'loss' %>">
+            <div class="summary-label">Return</div>
+            <div class="summary-value">
+              <%= totalProfitLossPercent >= 0 ? '+' : '' %><%= totalProfitLossPercent.toFixed(2) %>%
             </div>
-            <div class="summary-card <%= totalProfitLoss >= 0 ? 'profit' : 'loss' %>">
-                <div class="summary-label">Profit / Loss</div>
-                <div class="summary-value">
-                    <%= totalProfitLoss >= 0 ? '+' : '' %>$<%= totalProfitLoss.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %>
-                    <span class="summary-percent">(<%= totalProfitLossPercent >= 0 ? '+' : '' %><%= totalProfitLossPercent.toFixed(2) %>%)</span>
-                </div>
-            </div>
+          </div>
         </div>
 
-        <!-- Holdings Table -->
-        <div class="holdings-section animate-in" style="transition-delay: 0.15s">
-            <h2>My Holdings</h2>
-            <% if (holdings.length === 0) { %>
-                <div class="empty-state">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                    <h3>No Holdings Yet</h3>
-                    <p>Start building your portfolio by adding your first cryptocurrency holding.</p>
-                    <button class="btn-add-holding" onclick="openAddModal()">Add Your First Holding</button>
-                </div>
-            <% } else { %>
-                <div class="table-responsive">
-                    <table class="holdings-table">
-                        <thead>
-                            <tr>
-                                <th>Coin</th>
-                                <th>Amount</th>
-                                <th>Avg. Price</th>
-                                <th>Current Price</th>
-                                <th>Value</th>
-                                <th>P/L</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% holdings.forEach(holding => { %>
-                                <tr data-id="<%= holding.id %>">
-                                    <td>
-                                        <div class="coin-info">
-                                            <img src="<%= holding.image %>" alt="<%= holding.name %>" class="coin-icon">
-                                            <div>
-                                                <div class="coin-name"><%= holding.name %></div>
-                                                <div class="coin-symbol"><%= holding.symbol %></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><%= holding.quantity.toLocaleString('en-US', {maximumFractionDigits: 8}) %></td>
-                                    <td>$<%= holding.purchasePrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
-                                    <td>
-                                        <div>$<%= holding.currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
-                                        <div class="price-change <%= holding.priceChange24h >= 0 ? 'positive' : 'negative' %>">
-                                            <%= holding.priceChange24h >= 0 ? '+' : '' %><%= holding.priceChange24h.toFixed(2) %>%
-                                        </div>
-                                    </td>
-                                    <td>$<%= holding.currentValue.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></td>
-                                    <td class="<%= holding.profitLossPercent >= 0 ? 'profit' : 'loss' %>">
-                                        <%= holding.profitLossPercent >= 0 ? '+' : '' %><%= holding.profitLossPercent.toFixed(2) %>%
-                                    </td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-action btn-edit" onclick="openEditModal(<%= JSON.stringify(holding).replace(/"/g, '&quot;') %>)" title="Edit">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                                </svg>
-                                            </button>
-                                            <button class="btn-action btn-delete" onclick="deleteHolding(<%= holding.id %>)" title="Delete">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                </div>
-            <% } %>
+        <!-- Charts -->
+        <div class="charts-grid animate-in" style="transition-delay:0.1s">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Allocation</h3>
+            </div>
+            <div class="chart-body">
+              <canvas id="allocationChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Performance</h3>
+              <div class="time-filters">
+                <button class="time-btn active" data-period="7d">7D</button>
+                <button class="time-btn" data-period="30d">30D</button>
+                <button class="time-btn" data-period="90d">90D</button>
+              </div>
+            </div>
+            <div class="chart-body">
+              <canvas id="performanceChart"></canvas>
+            </div>
+          </div>
         </div>
 
-        <% if (holdings.length > 0) { %>
-        <!-- Analytics Section -->
-        <div class="analytics-section animate-in" style="transition-delay: 0.3s">
-            <h2>Portfolio Analytics</h2>
+      <% } %>
+    </div><!-- /overview -->
 
-            <div class="analytics-grid">
-                <!-- Allocation Pie Chart -->
-                <div class="analytics-card">
-                    <h3>Allocation by Coin</h3>
-                    <div class="chart-container">
-                        <canvas id="allocationChart"></canvas>
-                    </div>
-                </div>
+    <!-- ══════════════ HOLDINGS TAB ══════════════ -->
+    <div class="tab-panel" id="panel-holdings">
 
-                <!-- Performance Line Chart -->
-                <div class="analytics-card">
-                    <h3>Portfolio Performance</h3>
-                    <div class="time-filters">
-                        <button class="time-btn active" data-period="24h">24H</button>
-                        <button class="time-btn" data-period="7d">7D</button>
-                        <button class="time-btn" data-period="30d">30D</button>
-                        <button class="time-btn" data-period="all">ALL</button>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="performanceChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Best/Worst Performers -->
-            <div class="performers-grid">
-                <div class="performer-card best">
-                    <div class="performer-label">Best Performer</div>
-                    <% const bestPerformer = holdings.reduce((best, h) => h.profitLossPercent > best.profitLossPercent ? h : best, holdings[0]); %>
-                    <div class="performer-info">
-                        <img src="<%= bestPerformer.image %>" alt="<%= bestPerformer.name %>" class="performer-icon">
-                        <div>
-                            <div class="performer-name"><%= bestPerformer.name %> (<%= bestPerformer.symbol %>)</div>
-                            <div class="performer-change positive">+<%= bestPerformer.profitLossPercent.toFixed(2) %>%</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="performer-card worst">
-                    <div class="performer-label">Worst Performer</div>
-                    <% const worstPerformer = holdings.reduce((worst, h) => h.profitLossPercent < worst.profitLossPercent ? h : worst, holdings[0]); %>
-                    <div class="performer-info">
-                        <img src="<%= worstPerformer.image %>" alt="<%= worstPerformer.name %>" class="performer-icon">
-                        <div>
-                            <div class="performer-name"><%= worstPerformer.name %> (<%= worstPerformer.symbol %>)</div>
-                            <div class="performer-change <%= worstPerformer.profitLossPercent >= 0 ? 'positive' : 'negative' %>">
-                                <%= worstPerformer.profitLossPercent >= 0 ? '+' : '' %><%= worstPerformer.profitLossPercent.toFixed(2) %>%
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Performance Metrics -->
-            <div class="metrics-section">
-                <h3>Performance Metrics</h3>
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-label">24H Change</div>
-                        <% const avg24hChange = holdings.reduce((sum, h) => sum + (h.priceChange24h * h.currentValue), 0) / totalValue; %>
-                        <div class="metric-value <%= avg24hChange >= 0 ? 'positive' : 'negative' %>">
-                            <%= avg24hChange >= 0 ? '+' : '' %><%= avg24hChange.toFixed(2) %>%
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Total Return</div>
-                        <div class="metric-value <%= totalProfitLossPercent >= 0 ? 'positive' : 'negative' %>">
-                            <%= totalProfitLossPercent >= 0 ? '+' : '' %><%= totalProfitLossPercent.toFixed(2) %>%
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Total Coins</div>
-                        <div class="metric-value neutral"><%= holdings.length %></div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Avg. Position Size</div>
-                        <div class="metric-value neutral">$<%= (totalValue / holdings.length).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) %></div>
-                    </div>
-                </div>
-            </div>
+      <% if (holdings.length === 0) { %>
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <h3>No Holdings Yet</h3>
+          <p>Add your first cryptocurrency to start tracking your portfolio.</p>
+          <button class="btn-add-holding" id="btnHoldingsAdd">Add Your First Holding</button>
         </div>
-        <% } %>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="holdings-table">
+            <thead>
+              <tr>
+                <th>Coin</th>
+                <th>Quantity</th>
+                <th>Avg Buy Price</th>
+                <th>Current Price</th>
+                <th>Value</th>
+                <th>P/L ($)</th>
+                <th>P/L (%)</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% holdings.forEach(holding => { %>
+                <tr data-id="<%= holding.id %>">
+                  <td>
+                    <div class="coin-info">
+                      <img src="<%= holding.image %>" alt="<%= holding.name %>" class="coin-icon"
+                        onerror="this.style.display='none'">
+                      <div>
+                        <div class="coin-name"><%= holding.name %></div>
+                        <div class="coin-symbol"><%= holding.symbol %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><%= Number(holding.quantity).toLocaleString('en-US', {maximumFractionDigits:8}) %></td>
+                  <td>$<%= holding.purchasePrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) %></td>
+                  <td>
+                    <div>$<%= holding.currentPrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) %></div>
+                    <div class="price-change <%= holding.priceChange24h >= 0 ? 'positive' : 'negative' %>">
+                      <%= holding.priceChange24h >= 0 ? '+' : '' %><%= holding.priceChange24h.toFixed(2) %>%
+                    </div>
+                  </td>
+                  <td>$<%= holding.currentValue.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) %></td>
+                  <td class="<%= holding.profitLoss >= 0 ? 'profit' : 'loss' %>">
+                    <%= holding.profitLoss >= 0 ? '+' : '' %>$<%= Math.abs(holding.profitLoss).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) %>
+                  </td>
+                  <td class="<%= holding.profitLossPercent >= 0 ? 'profit' : 'loss' %>">
+                    <%= holding.profitLossPercent >= 0 ? '+' : '' %><%= holding.profitLossPercent.toFixed(2) %>%
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <button class="btn-action btn-edit"
+                        onclick="openEditModal(<%= JSON.stringify(holding).replace(/"/g, '&quot;') %>)" title="Edit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                      </button>
+                      <button class="btn-action btn-delete" onclick="deleteHolding(<%= holding.id %>)"
+                        title="Delete">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path
+                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                          </path>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div><!-- /holdings -->
+
+    <!-- ══════════════ ANALYTICS TAB ══════════════ -->
+    <div class="tab-panel" id="panel-analytics">
+      <% if (holdings.length === 0) { %>
+        <p class="empty-tab-msg">Add holdings in the Holdings tab to see analytics.</p>
+      <% } else { %>
+        <div class="analytics-grid">
+          <div class="analytics-chart-card">
+            <h3>P/L by Coin</h3>
+            <canvas id="plBarChart"></canvas>
+          </div>
+          <div class="analytics-chart-card">
+            <h3>Allocation</h3>
+            <canvas id="analyticsDonut"></canvas>
+          </div>
+        </div>
+        <div class="perf-cards">
+          <%
+            const best = holdings.reduce((a, b) => a.profitLossPercent > b.profitLossPercent ? a : b);
+            const worst = holdings.reduce((a, b) => a.profitLossPercent < b.profitLossPercent ? a : b);
+          %>
+          <div class="perf-card best">
+            <div class="perf-label">Best Performer</div>
+            <div class="perf-name"><%= best.name %> (<%= best.symbol %>)</div>
+            <div class="perf-value">+<%= best.profitLossPercent.toFixed(2) %>%</div>
+          </div>
+          <div class="perf-card worst">
+            <div class="perf-label">Worst Performer</div>
+            <div class="perf-name"><%= worst.name %> (<%= worst.symbol %>)</div>
+            <div class="perf-value"><%= worst.profitLossPercent.toFixed(2) %>%</div>
+          </div>
+        </div>
+      <% } %>
+    </div><!-- /analytics -->
+
+    <!-- ══════════════ WATCHLIST TAB ══════════════ -->
+    <div class="tab-panel" id="panel-watchlist">
+      <div class="watchlist-tab-header">
+        <h2>My Watchlist</h2>
+        <button class="btn-add-holding" id="btnAddWatchlist">+ Add Coin</button>
+      </div>
+
+      <% if (watchlist.length === 0) { %>
+        <p class="empty-tab-msg">No coins in your watchlist yet. Add one above.</p>
+      <% } else { %>
+        <div class="watchlist-inline-grid">
+          <% watchlist.forEach(coin => { %>
+            <div class="watchlist-inline-card" data-coin-id="<%= coin.coinId %>">
+              <% if (coin.image) { %>
+                <img src="<%= coin.image %>" alt="<%= coin.name %>" class="wl-coin-logo"
+                  onerror="this.style.display='none'">
+              <% } else { %>
+                <div class="wl-coin-logo-placeholder"><%= coin.symbol.charAt(0) %></div>
+              <% } %>
+              <div class="wl-coin-info">
+                <div class="wl-coin-name"><%= coin.name %></div>
+                <div class="wl-coin-symbol"><%= coin.symbol %></div>
+              </div>
+              <div class="wl-coin-price">
+                <div class="wl-price-val">
+                  <% if (coin.currentPrice) { %>
+                    $<%= coin.currentPrice.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2}) %>
+                  <% } else { %>
+                    &mdash;
+                  <% } %>
+                </div>
+                <div class="wl-price-change <%= coin.priceChange24h >= 0 ? 'wl-price-up' : 'wl-price-down' %>">
+                  <%= coin.priceChange24h >= 0 ? '+' : '' %><%= coin.priceChange24h.toFixed(2) %>%
+                </div>
+              </div>
+              <button class="wl-remove-btn" onclick="removeWatchlistCoin('<%= coin.coinId %>')" title="Remove">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </div><!-- /watchlist -->
+
+  </div><!-- /portfolio-container -->
+
+  <!-- ══════════════ ADD HOLDING MODAL ══════════════ -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add Holding</h2>
+        <button class="modal-close" onclick="closeAddModal()">&times;</button>
+      </div>
+      <form id="addHoldingForm">
+
+        <!-- Coin Search -->
+        <div class="form-group" style="position:relative">
+          <label class="form-label">Coin</label>
+          <input type="text" id="coinSearch" class="form-input" placeholder="Search Bitcoin, ETH&hellip;"
+            autocomplete="off">
+          <div id="coinSearchResults" class="coin-search-dropdown" style="display:none"></div>
+          <div id="selectedCoinDisplay" class="selected-coin-display" style="display:none"></div>
+          <input type="hidden" id="coinId" name="coinId">
+          <input type="hidden" id="coinSymbol" name="symbol">
+          <input type="hidden" id="coinName" name="name">
+          <input type="hidden" id="coinImage" name="image">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <input type="number" name="quantity" class="form-input" placeholder="0.00" step="any" min="0.000001" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purchase Price (USD)</label>
+          <input type="number" name="purchasePrice" class="form-input" placeholder="0.00" step="any" min="0.01" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purchase Date <span style="color:var(--muted-foreground);font-weight:400">(optional)</span></label>
+          <input type="date" name="purchaseDate" class="form-input">
+        </div>
+
+        <div id="addFormError" class="form-error" style="display:none"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+          <button type="submit" class="btn-submit">Add Holding</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- Add/Edit Holding Modal -->
-    <div id="holdingModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Add New Holding</h2>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
-            </div>
-            <form id="holdingForm" onsubmit="saveHolding(event)">
-                <input type="hidden" id="holdingId" name="holdingId">
-                <input type="hidden" id="coinId" name="coinId">
-                <input type="hidden" id="coinImage" name="coinImage">
-
-                <div class="form-group">
-                    <label for="coinSearch">Search Coin</label>
-                    <div class="search-wrapper">
-                        <input type="text" id="coinSearch" class="form-control" placeholder="Search for a coin..." autocomplete="off">
-                        <div id="searchResults" class="search-results"></div>
-                    </div>
-                    <div id="selectedCoin" class="selected-coin" style="display: none;">
-                        <img id="selectedCoinImage" src="" alt="">
-                        <span id="selectedCoinName"></span>
-                        <button type="button" class="btn-clear" onclick="clearCoinSelection()">&times;</button>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="quantity">Quantity</label>
-                        <input type="number" id="quantity" name="quantity" class="form-control" step="any" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="purchasePrice">Purchase Price ($)</label>
-                        <div class="price-input-wrapper">
-                            <input type="number" id="purchasePrice" name="purchasePrice" class="form-control" step="any" min="0" required>
-                            <button type="button" class="btn-current-price" onclick="useCurrentPrice()">Current</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="purchaseDate">Purchase Date</label>
-                    <input type="date" id="purchaseDate" name="purchaseDate" class="form-control">
-                </div>
-
-                <div class="form-group">
-                    <label for="notes">Notes (optional)</label>
-                    <textarea id="notes" name="notes" class="form-control" rows="2" placeholder="Add any notes..."></textarea>
-                </div>
-
-                <div class="modal-actions">
-                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn-save" id="saveBtn">Add Holding</button>
-                </div>
-            </form>
+  <!-- ══════════════ EDIT HOLDING MODAL ══════════════ -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Holding</h2>
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+      <form id="editHoldingForm">
+        <input type="hidden" id="editHoldingId">
+        <div class="form-group">
+          <label class="form-label">Coin</label>
+          <div id="editCoinDisplay" class="form-input" style="opacity:0.7;cursor:default"></div>
         </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content modal-small">
-            <div class="modal-header">
-                <h2>Confirm Delete</h2>
-                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
-            </div>
-            <p>Are you sure you want to delete this holding? This action cannot be undone.</p>
-            <div class="modal-actions">
-                <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-                <button type="button" class="btn-delete-confirm" id="confirmDeleteBtn">Delete</button>
-            </div>
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <input type="number" id="editQuantity" name="quantity" class="form-input" step="any" min="0.000001" required>
         </div>
+        <div class="form-group">
+          <label class="form-label">Purchase Price (USD)</label>
+          <input type="number" id="editPurchasePrice" name="purchasePrice" class="form-input" step="any" min="0.01" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purchase Date</label>
+          <input type="date" id="editPurchaseDate" name="purchaseDate" class="form-input">
+        </div>
+        <div id="editFormError" class="form-error" style="display:none"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn-submit">Save Changes</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <%- include('../partials/footer') %>
+  <!-- ══════════════ ADD WATCHLIST MODAL ══════════════ -->
+  <div class="modal-overlay" id="watchlistModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add to Watchlist</h2>
+        <button class="modal-close" onclick="closeWatchlistModal()">&times;</button>
+      </div>
+      <div class="form-group" style="position:relative">
+        <label class="form-label">Search Coin</label>
+        <input type="text" id="wlCoinSearch" class="form-input" placeholder="Search Bitcoin, ETH&hellip;"
+          autocomplete="off">
+        <div id="wlCoinSearchResults" class="coin-search-dropdown" style="display:none"></div>
+        <div id="wlSelectedCoinDisplay" class="selected-coin-display" style="display:none"></div>
+        <input type="hidden" id="wlCoinId">
+        <input type="hidden" id="wlCoinSymbol">
+        <input type="hidden" id="wlCoinName">
+        <input type="hidden" id="wlCoinImage">
+      </div>
+      <div id="wlFormError" class="form-error" style="display:none"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeWatchlistModal()">Cancel</button>
+        <button type="button" class="btn-submit" onclick="submitWatchlistAdd()">Add to Watchlist</button>
+      </div>
+    </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/js/portfolio.js"></script>
+  <div class="modal-overlay" id="modalBackdrop" onclick="closeAllModals()"></div>
 
+  <!-- ══════════════ SCRIPTS ══════════════ -->
+  <script>
+    // ── Tab switching ─────────────────────────────
+    const VALID_TABS = ['overview', 'holdings', 'analytics', 'watchlist'];
+
+    function switchTab(tabId) {
+      if (!VALID_TABS.includes(tabId)) tabId = 'overview';
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('panel-' + tabId).classList.add('active');
+      document.querySelector('[data-tab="' + tabId + '"]').classList.add('active');
+      history.replaceState(null, '', '#' + tabId);
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    const initialTab = location.hash.slice(1);
+    switchTab(VALID_TABS.includes(initialTab) ? initialTab : 'overview');
+
+    // ── Modal helpers ─────────────────────────────
+    function openAddModal() {
+      resetAddForm();
+      document.getElementById('addModal').classList.add('active');
+      document.getElementById('modalBackdrop').classList.add('active');
+    }
+    function closeAddModal() {
+      document.getElementById('addModal').classList.remove('active');
+      document.getElementById('modalBackdrop').classList.remove('active');
+    }
+    function openEditModal(holding) {
+      document.getElementById('editHoldingId').value = holding.id;
+      document.getElementById('editCoinDisplay').textContent = holding.name + ' (' + holding.symbol + ')';
+      document.getElementById('editQuantity').value = holding.quantity;
+      document.getElementById('editPurchasePrice').value = holding.purchasePrice;
+      document.getElementById('editPurchaseDate').value = holding.purchaseDate || '';
+      document.getElementById('editFormError').style.display = 'none';
+      document.getElementById('editModal').classList.add('active');
+      document.getElementById('modalBackdrop').classList.add('active');
+    }
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('active');
+      document.getElementById('modalBackdrop').classList.remove('active');
+    }
+    function openWatchlistModal() {
+      resetWatchlistForm();
+      document.getElementById('watchlistModal').classList.add('active');
+      document.getElementById('modalBackdrop').classList.add('active');
+    }
+    function closeWatchlistModal() {
+      document.getElementById('watchlistModal').classList.remove('active');
+      document.getElementById('modalBackdrop').classList.remove('active');
+    }
+    function closeAllModals() {
+      closeAddModal(); closeEditModal(); closeWatchlistModal();
+    }
+
+    // Wire up "Add Holding" buttons
+    ['btnAddHolding', 'btnOnboardAdd', 'btnHoldingsAdd'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', () => { switchTab('holdings'); openAddModal(); });
+    });
+    document.getElementById('btnAddWatchlist').addEventListener('click', openWatchlistModal);
+
+    // ── Coin search ───────────────────────────────
+    let marketCoins = [];
+
+    async function loadMarketCoins() {
+      if (marketCoins.length > 0) return;
+      try {
+        const res = await fetch('/api/markets');
+        marketCoins = await res.json();
+      } catch (e) {
+        console.error('Failed to load market coins', e);
+      }
+    }
+
+    function filterCoins(query) {
+      const q = query.toLowerCase().trim();
+      if (!q) return [];
+      return marketCoins.filter(c =>
+        c.name.toLowerCase().includes(q) || c.symbol.toLowerCase().includes(q)
+      ).slice(0, 8);
+    }
+
+    function buildCoinDropdown(coins, onSelect) {
+      const ul = document.createElement('ul');
+      ul.style.cssText = 'list-style:none;margin:0;padding:0';
+      coins.forEach(coin => {
+        const li = document.createElement('li');
+        li.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border)';
+        li.innerHTML =
+          '<img src="' + coin.image + '" alt="" style="width:24px;height:24px;border-radius:50%">' +
+          '<span style="font-weight:600;font-size:.9rem">' + coin.name + '</span>' +
+          '<span style="color:var(--muted-foreground);font-size:.8rem;margin-left:auto">' + coin.symbol.toUpperCase() + '</span>';
+        li.addEventListener('mouseenter', () => li.style.background = 'var(--muted)');
+        li.addEventListener('mouseleave', () => li.style.background = '');
+        li.addEventListener('click', () => onSelect(coin));
+        ul.appendChild(li);
+      });
+      return ul;
+    }
+
+    function wireSearchInput(inputId, resultsId, displayId, hiddenIds, onSelect) {
+      const input = document.getElementById(inputId);
+      const results = document.getElementById(resultsId);
+      const display = document.getElementById(displayId);
+
+      input.addEventListener('focus', loadMarketCoins);
+      input.addEventListener('input', () => {
+        const coins = filterCoins(input.value);
+        results.innerHTML = '';
+        if (!coins.length) { results.style.display = 'none'; return; }
+        results.appendChild(buildCoinDropdown(coins, coin => {
+          document.getElementById(hiddenIds.coinId).value = coin.id;
+          document.getElementById(hiddenIds.symbol).value = coin.symbol;
+          document.getElementById(hiddenIds.name).value = coin.name;
+          document.getElementById(hiddenIds.image).value = coin.image;
+          display.innerHTML =
+            '<img src="' + coin.image + '" alt="" style="width:20px;height:20px;border-radius:50%;margin-right:8px">' +
+            '<strong>' + coin.name + '</strong> <span style="color:var(--muted-foreground);margin-left:6px">' + coin.symbol.toUpperCase() + '</span>';
+          display.style.display = 'flex';
+          input.style.display = 'none';
+          results.style.display = 'none';
+          if (onSelect) onSelect(coin);
+        }));
+        results.style.display = 'block';
+      });
+    }
+
+    function resetAddForm() {
+      document.getElementById('addHoldingForm').reset();
+      document.getElementById('coinSearch').style.display = '';
+      document.getElementById('selectedCoinDisplay').style.display = 'none';
+      document.getElementById('coinSearchResults').style.display = 'none';
+      document.getElementById('coinId').value = '';
+      document.getElementById('addFormError').style.display = 'none';
+    }
+
+    function resetWatchlistForm() {
+      document.getElementById('wlCoinSearch').value = '';
+      document.getElementById('wlCoinSearch').style.display = '';
+      document.getElementById('wlSelectedCoinDisplay').style.display = 'none';
+      document.getElementById('wlCoinSearchResults').style.display = 'none';
+      document.getElementById('wlCoinId').value = '';
+      document.getElementById('wlFormError').style.display = 'none';
+    }
+
+    wireSearchInput('coinSearch', 'coinSearchResults', 'selectedCoinDisplay',
+      { coinId: 'coinId', symbol: 'coinSymbol', name: 'coinName', image: 'coinImage' });
+
+    wireSearchInput('wlCoinSearch', 'wlCoinSearchResults', 'wlSelectedCoinDisplay',
+      { coinId: 'wlCoinId', symbol: 'wlCoinSymbol', name: 'wlCoinName', image: 'wlCoinImage' });
+
+    // ── Add Holding submit ─────────────────────────
+    document.getElementById('addHoldingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('addFormError');
+      errEl.style.display = 'none';
+
+      if (!document.getElementById('coinId').value) {
+        errEl.textContent = 'Please select a coin from the search results.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const form = e.target;
+      const body = {
+        coinId: document.getElementById('coinId').value,
+        symbol: document.getElementById('coinSymbol').value,
+        name: document.getElementById('coinName').value,
+        image: document.getElementById('coinImage').value,
+        quantity: form.quantity.value,
+        purchasePrice: form.purchasePrice.value,
+        purchaseDate: form.purchaseDate.value || undefined
+      };
+
+      try {
+        const res = await fetch('/portfolio/holdings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to add holding');
+        closeAddModal();
+        location.reload();
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.style.display = 'block';
+      }
+    });
+
+    // ── Edit Holding submit ────────────────────────
+    document.getElementById('editHoldingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('editFormError');
+      errEl.style.display = 'none';
+      const id = document.getElementById('editHoldingId').value;
+      const body = {
+        quantity: document.getElementById('editQuantity').value,
+        purchasePrice: document.getElementById('editPurchasePrice').value,
+        purchaseDate: document.getElementById('editPurchaseDate').value || undefined
+      };
+      try {
+        const res = await fetch('/portfolio/holdings/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to update holding');
+        closeEditModal();
+        location.reload();
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.style.display = 'block';
+      }
+    });
+
+    // ── Delete Holding ─────────────────────────────
+    async function deleteHolding(id) {
+      if (!confirm('Remove this holding from your portfolio?')) return;
+      try {
+        const res = await fetch('/portfolio/holdings/' + id, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Delete failed');
+        location.reload();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // ── Watchlist add/remove ───────────────────────
+    async function submitWatchlistAdd() {
+      const errEl = document.getElementById('wlFormError');
+      errEl.style.display = 'none';
+      const coinId = document.getElementById('wlCoinId').value;
+      if (!coinId) {
+        errEl.textContent = 'Please select a coin.';
+        errEl.style.display = 'block';
+        return;
+      }
+      try {
+        const res = await fetch('/portfolio/watchlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            coinId,
+            symbol: document.getElementById('wlCoinSymbol').value,
+            name: document.getElementById('wlCoinName').value,
+            image: document.getElementById('wlCoinImage').value
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to add to watchlist');
+        closeWatchlistModal();
+        location.reload();
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.style.display = 'block';
+      }
+    }
+
+    async function removeWatchlistCoin(coinId) {
+      if (!confirm('Remove from watchlist?')) return;
+      try {
+        const res = await fetch('/portfolio/watchlist/' + coinId, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Remove failed');
+        location.reload();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // ── Coin search dropdown styles ─────────────────
+    const style = document.createElement('style');
+    style.textContent = `
+      .coin-search-dropdown {
+        position:absolute; top:100%; left:0; right:0; z-index:200;
+        background:var(--card); border:1px solid var(--border);
+        border-radius:8px; max-height:240px; overflow-y:auto;
+        box-shadow:0 8px 24px rgba(0,0,0,0.3);
+      }
+      .selected-coin-display {
+        display:flex; align-items:center;
+        padding:10px 14px; background:var(--muted);
+        border-radius:8px; font-size:.9rem; cursor:pointer;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // ── Charts (only when holdings exist) ──────────
     <% if (holdings.length > 0) { %>
-    <script>
-        // Chart.js default configuration
-        Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--muted-foreground').trim();
-        Chart.defaults.borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+    const holdingsData = <%- JSON.stringify(holdings) %>;
 
-        // Allocation Pie Chart
-        const allocationCtx = document.getElementById('allocationChart').getContext('2d');
-        const allocationData = <%- JSON.stringify(holdings.map(h => ({ name: h.name, symbol: h.symbol, value: h.currentValue }))) %>;
-        const totalValue = <%= totalValue %>;
-
-        const cs = getComputedStyle(document.documentElement);
-        const colors = [
-            cs.getPropertyValue('--chart-1').trim(),
-            cs.getPropertyValue('--chart-2').trim(),
-            cs.getPropertyValue('--chart-3').trim(),
-            cs.getPropertyValue('--chart-4').trim(),
-            cs.getPropertyValue('--chart-5').trim(),
-            '#f39c12', '#1abc9c', '#e91e63', '#00bcd4', '#ff5722'
-        ];
-
-        new Chart(allocationCtx, {
-            type: 'doughnut',
-            data: {
-                labels: allocationData.map(d => `${d.symbol} (${((d.value / totalValue) * 100).toFixed(1)}%)`),
-                datasets: [{
-                    data: allocationData.map(d => d.value),
-                    backgroundColor: colors.slice(0, allocationData.length),
-                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card').trim(),
-                    borderWidth: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true,
-                            pointStyle: 'circle'
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const value = context.raw;
-                                const percentage = ((value / totalValue) * 100).toFixed(1);
-                                return `$${value.toLocaleString()} (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
+    // Allocation pie (Overview)
+    new Chart(document.getElementById('allocationChart'), {
+      type: 'doughnut',
+      data: {
+        labels: holdingsData.map(h => h.symbol),
+        datasets: [{
+          data: holdingsData.map(h => h.currentValue),
+          backgroundColor: [
+            '#f59e0b','#f97316','#ef4444','#8b5cf6',
+            '#3b82f6','#10b981','#06b6d4','#ec4899'
+          ].slice(0, holdingsData.length),
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: 'var(--foreground)', padding: 12 } },
+          tooltip: {
+            callbacks: {
+              label: ctx => ' $' + ctx.raw.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})
             }
-        });
-
-        // Performance Line Chart (Mock historical data for now)
-        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
-
-        // Generate mock performance data
-        function generateMockPerformanceData(days) {
-            const data = [];
-            const labels = [];
-            let value = totalValue * 0.85; // Start at 85% of current value
-            const volatility = 0.02;
-
-            for (let i = days; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-
-                if (days <= 1) {
-                    labels.push(date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }));
-                } else if (days <= 7) {
-                    labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
-                } else {
-                    labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-                }
-
-                // Random walk towards current value
-                const progress = (days - i) / days;
-                const target = totalValue;
-                value = value + (target - value) * 0.1 + (Math.random() - 0.5) * value * volatility;
-                data.push(value);
-            }
-
-            // Ensure last point is current value
-            data[data.length - 1] = totalValue;
-
-            return { labels, data };
+          }
         }
+      }
+    });
 
-        let performanceChart;
+    // Performance line (Overview)
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+    let performanceChart;
 
-        function updatePerformanceChart(period) {
-            const days = period === '24h' ? 1 : period === '7d' ? 7 : period === '30d' ? 30 : 90;
-            const { labels, data } = generateMockPerformanceData(days);
+    function generateMockPerformanceData(days) {
+      const labels = [], data = [];
+      const totalInvested = <%= totalInvested %>;
+      const totalValue = <%= totalValue %>;
+      let value = totalInvested * (1 - (totalValue - totalInvested) / totalInvested * 0.3);
+      const volatility = 0.03;
+      for (let i = days; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        labels.push(d.toLocaleDateString('en-US', { month:'short', day:'numeric' }));
+        value = value + (totalValue - value) * 0.1 + (Math.random() - 0.48) * value * volatility;
+        data.push(Math.max(0, value));
+      }
+      data[data.length - 1] = totalValue;
+      return { labels, data };
+    }
 
-            if (performanceChart) {
-                performanceChart.destroy();
+    function updatePerformanceChart(period) {
+      const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+      const { labels, data } = generateMockPerformanceData(days);
+      if (performanceChart) performanceChart.destroy();
+      const gradient = performanceCtx.createLinearGradient(0, 0, 0, 280);
+      gradient.addColorStop(0, 'rgba(245,158,11,0.3)');
+      gradient.addColorStop(1, 'rgba(245,158,11,0)');
+      performanceChart = new Chart(performanceCtx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            data,
+            borderColor: '#f59e0b',
+            backgroundColor: gradient,
+            borderWidth: 2,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { intersect: false, mode: 'index' },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => '$' + ctx.raw.toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})
+              }
             }
-
-            const gradient = performanceCtx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(245, 158, 11, 0.3)');
-            gradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
-
-            performanceChart = new Chart(performanceCtx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Portfolio Value',
-                        data: data,
-                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(),
-                        backgroundColor: gradient,
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointHoverBackgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim(),
-                        pointHoverBorderColor: '#fff',
-                        pointHoverBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return '$' + context.raw.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        },
-                        y: {
-                            grid: {
-                                color: 'rgba(23, 23, 23, 0.5)'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + value.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: 'var(--muted-foreground)' } },
+            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'var(--muted-foreground)', callback: v => '$' + v.toLocaleString() } }
+          }
         }
+      });
+    }
 
-        // Initialize with 7d view
-        updatePerformanceChart('7d');
+    updatePerformanceChart('7d');
+    document.querySelectorAll('.time-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        updatePerformanceChart(this.dataset.period);
+      });
+    });
 
-        // Time filter buttons
-        document.querySelectorAll('.time-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                updatePerformanceChart(this.dataset.period);
-            });
-        });
-    </script>
+    // P/L bar chart (Analytics)
+    new Chart(document.getElementById('plBarChart'), {
+      type: 'bar',
+      data: {
+        labels: holdingsData.map(h => h.symbol),
+        datasets: [{
+          label: 'P/L %',
+          data: holdingsData.map(h => parseFloat(h.profitLossPercent.toFixed(2))),
+          backgroundColor: holdingsData.map(h => h.profitLossPercent >= 0 ? 'rgba(34,197,94,0.7)' : 'rgba(239,68,68,0.7)'),
+          borderColor: holdingsData.map(h => h.profitLossPercent >= 0 ? 'rgb(34,197,94)' : 'rgb(239,68,68)'),
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { callback: v => v + '%', color: 'var(--muted-foreground)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+          y: { ticks: { color: 'var(--muted-foreground)' }, grid: { display: false } }
+        }
+      }
+    });
+
+    // Allocation donut (Analytics)
+    new Chart(document.getElementById('analyticsDonut'), {
+      type: 'doughnut',
+      data: {
+        labels: holdingsData.map(h => h.name),
+        datasets: [{
+          data: holdingsData.map(h => h.currentValue),
+          backgroundColor: [
+            '#f59e0b','#f97316','#ef4444','#8b5cf6',
+            '#3b82f6','#10b981','#06b6d4','#ec4899'
+          ].slice(0, holdingsData.length),
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: 'var(--foreground)', padding: 10, boxWidth: 12 } }
+        }
+      }
+    });
     <% } %>
-    <script src="/js/observer.js"></script>
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/observer.js"></script>
 </body>
 </html>
