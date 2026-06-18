@@ -28,6 +28,30 @@ Built with a production-grade stack: rate limiting, CSP headers, bcrypt password
 
 ---
 
+## By the Numbers
+
+| Metric | Value |
+|---|---|
+| Cryptocurrencies tracked (Markets page) | **100** (top by market cap) |
+| Cryptocurrencies on Homepage | **12** (top by market cap) |
+| Coin search index (for Add Holding / Watchlist) | **250** coins, returns top **8** matches |
+| API cache TTL — homepage & markets | **5 minutes** |
+| API cache TTL — coin search index | **30 minutes** |
+| Portfolio dashboard tabs | **4** (Overview, Holdings, Analytics, Watchlist) |
+| Performance chart time ranges | **3** (7D, 30D, 90D) |
+| Chart palette (allocation / analytics) | **8** distinct colours |
+| Quantity precision (holdings) | Up to **8 decimal places** |
+| Auth rate limit | **10 requests / 15 minutes** per IP |
+| bcrypt cost factor | **10** |
+| Session cookie lifetime | **7 days** |
+| Sentry trace sampling — production | **20%** |
+| Automated tests | **40** across **5** suites |
+| Production dependencies | **13** |
+| Dev dependencies | **3** |
+| CI jobs | **2** (test → deploy, gated) |
+
+---
+
 ## Table of Contents
 
 - [Features](#features)
@@ -49,30 +73,33 @@ Built with a production-grade stack: rate limiting, CSP headers, bcrypt password
 ### Market Intelligence
 | Feature | Detail |
 |---|---|
-| Live market data | Top 12 coins on the homepage, top 100 in the Markets page — prices refresh every 60 seconds |
-| Server-side cache | 5-minute in-memory TTL; stale-cache fallback prevents downtime on API outages |
-| Interactive charts | Historical performance chart (7D / 30D / 90D) and portfolio allocation doughnut via Chart.js |
-| Lottie animations | Smooth blockchain-themed animations served from `cdn.jsdelivr.net` (CSP-compliant) |
+| Live market data | **Top 12** coins on the homepage; **top 100** coins on the Markets page, ordered by market cap |
+| Server-side caching | **2 independent caches** — homepage/markets: **5-min TTL**; coin search index: **30-min TTL**. Stale-cache fallback on API outages |
+| Coin search | Searches a **250-coin** index, returns the top **8** matches by name or symbol — no extra network call |
+| Interactive charts | Performance chart with **3 selectable time ranges** (7D / 30D / 90D); allocation doughnut with **8-colour** palette |
+| Lottie animations | 2 blockchain-themed animations (`blockchain.json`, `network.json`) served from `cdn.jsdelivr.net` (CSP-compliant) |
 
-### Portfolio Dashboard (4 tabs)
+### Portfolio Dashboard — 4 tabs, zero page reloads
 | Tab | What it shows |
 |---|---|
-| **Overview** | Total value, invested, P/L, return % — with allocation doughnut and simulated performance line chart |
-| **Holdings** | Full CRUD table — add via coin search (live `/api/markets` filter), edit, delete |
-| **Analytics** | Horizontal P/L bar chart per coin, allocation donut, best/worst performer cards |
-| **Watchlist** | Inline coin cards with live price + 24h change; add/remove without leaving the page |
+| **Overview** | 4 summary cards (total value, invested, P/L $, return %) + allocation doughnut + performance line chart |
+| **Holdings** | Full CRUD table — add via 250-coin search, edit, delete. Quantity displayed to **8 decimal places** |
+| **Analytics** | Horizontal P/L bar chart per coin, mirrored allocation donut, best & worst performer cards |
+| **Watchlist** | Inline coin cards with live price + 24h % change; add/remove without leaving the page |
+
+Tab state is stored in the **URL hash** (`#overview`, `#holdings`, etc.) for direct-linkable deep navigation.
 
 ### Authentication & Security
-- **bcrypt** password hashing (cost factor 10)
-- **PostgreSQL session store** (`connect-pg-simple`) — sessions survive server restarts and Vercel serverless cold starts
-- `req.session.save()` wraps every redirect to guarantee session flush before response
-- **Rate limiting** — 10 requests per 15 minutes on all auth endpoints
-- **Helmet CSP** — strict `scriptSrc`, `imgSrc`, `connectSrc` whitelist; no inline eval
-- **express-validator** input sanitisation on all form fields
+- **bcrypt** password hashing — cost factor **10** (~100ms deliberate delay against brute force)
+- **PostgreSQL session store** (`connect-pg-simple`) — sessions survive Vercel serverless cold starts; **7-day** cookie lifetime
+- `req.session.save()` wraps every post-auth redirect to guarantee session flush before response on serverless
+- **Rate limiting** — **10 requests / 15 minutes** per IP on all `/auth` endpoints
+- **Helmet CSP** — strict `scriptSrc`, `imgSrc`, `connectSrc` whitelist; no `unsafe-eval`
+- **express-validator** sanitises and validates all form inputs server-side before any DB write
 
 ### Observability
-- **Winston** structured logging (info / warn / error) with timestamps
-- **Sentry** error monitoring wired to the Express error handler; 20% trace sampling in production
+- **Winston** structured logging across 3 levels (info / warn / error) with ISO timestamps on every request
+- **Sentry** error monitoring — **20%** trace sampling in production, 100% in development; wired directly to the Express error handler
 
 ---
 
@@ -384,10 +411,10 @@ cryptipulse/
 
 ## Testing
 
-The project has **40 automated tests** across 5 suites, running against an isolated Supabase test project (separate from production).
+**40 tests · 5 suites · 0 mocks** — all run against an isolated Supabase test project (completely separate from production data).
 
 ```bash
-# Run all tests
+# Run all 40 tests
 npm test
 
 # Watch mode (development)
@@ -397,21 +424,22 @@ npm run test:watch
 npx jest tests/integration/auth.test.js
 ```
 
-### Coverage summary
+### Coverage breakdown
 
 | Suite | Tests | What's covered |
 |---|---|---|
-| `auth.test.js` | 7 | Login, register, duplicate email, wrong password, logout, session persistence |
-| `portfolio.test.js` | 10 | GET /portfolio (auth guard + watchlist data in response), holdings CRUD, validation |
-| `watchlist.test.js` | 9 | Add coin, remove coin, duplicate prevention, unauthenticated access guard |
-| `auth.utils.test.js` | 7 | Password hashing helpers, session utilities |
-| `portfolio.utils.test.js` | 7 | Price enrichment logic, P/L calculations |
+| `auth.test.js` | **7** | Register, login (valid + wrong password + unknown email), duplicate email rejection, logout, session destruction |
+| `portfolio.test.js` | **10** | Auth guard on GET /portfolio, watchlist data present in rendered HTML, holdings CRUD (add/update/delete), input validation (zero quantity, missing coinId) |
+| `watchlist.test.js` | **9** | Add coin, remove coin, duplicate coin prevention (unique constraint), unauthenticated access guard |
+| `auth.utils.test.js` | **7** | bcrypt hashing and comparison, session utility helpers |
+| `portfolio.utils.test.js` | **7** | P/L calculation logic, live price enrichment, percentage return computation |
+| **Total** | **40** | — |
 
-### Design decisions
+### Engineering decisions
 
-- **Real database, no mocks** — Tests hit a live Supabase Postgres instance. Mocking previously masked migration bugs that only appeared in production.
-- **Factory helpers** — `createTestUser()`, `createTestHolding()`, `createTestWatchlistCoin()` insert rows and return data; `afterEach` cleans up by `user_id`.
-- **Supertest agent** — Stateful `request.agent(app)` carries session cookies across requests, enabling full end-to-end auth flows in tests.
+- **Real database, no mocks** — Tests hit a live Supabase Postgres instance. Mocking the DB previously masked a migration bug where mocked tests passed but the production schema rejected the same query.
+- **3 factory helpers** — `createTestUser()`, `createTestHolding()`, `createTestWatchlistCoin()` each insert a row and return the created record; `afterEach` deletes by `user_id` for clean state.
+- **Supertest agent** — Stateful `request.agent(app)` carries session cookies across multiple requests, enabling full end-to-end authenticated flows (login → portfolio → delete) in a single test.
 
 ---
 
@@ -449,14 +477,14 @@ git push origin main
 
 | Layer | Implementation |
 |---|---|
-| **Password hashing** | `bcryptjs` with cost factor 10 |
-| **Session storage** | PostgreSQL via `connect-pg-simple` — no sensitive data client-side |
-| **Cookie hardening** | `httpOnly: true`, `secure: true` in production, 7-day expiry |
-| **Rate limiting** | 10 requests / 15 minutes on all `/auth` endpoints |
-| **Content Security Policy** | Helmet with strict `scriptSrc`, `imgSrc`, `connectSrc` whitelists |
-| **Input validation** | `express-validator` sanitises and validates all form inputs server-side |
-| **Session flush** | `req.session.save()` before every post-auth redirect — prevents race conditions on Vercel serverless cold starts |
-| **Error monitoring** | Sentry captures unhandled exceptions; 20% trace sampling in production |
+| **Password hashing** | `bcryptjs` — cost factor **10** (~100ms per hash; deliberate slowdown against brute force) |
+| **Session storage** | PostgreSQL via `connect-pg-simple` — zero sensitive data client-side; **7-day** cookie lifetime |
+| **Cookie hardening** | `httpOnly: true`, `secure: true` in production, `sameSite` default |
+| **Rate limiting** | **10 requests / 15 minutes** per IP on all `/auth` endpoints (`express-rate-limit`) |
+| **Content Security Policy** | Helmet — strict `scriptSrc` (jsdelivr + cdnjs only), `imgSrc` (coingecko only), `connectSrc: self`; no `unsafe-eval` |
+| **Input validation** | `express-validator` — trim, normalise, and validate all form fields before any DB write |
+| **Session flush** | `req.session.save()` before every post-auth redirect — prevents lost-session race on Vercel serverless |
+| **Error monitoring** | Sentry — **20%** trace sampling in production, **100%** in development; wired to Express error handler |
 
 ---
 
