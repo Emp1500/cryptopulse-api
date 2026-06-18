@@ -766,3 +766,222 @@
         height: 250px;
     }
 }
+
+/* ── Tab Navigation ─────────────────────────────── */
+.tab-nav {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted-foreground);
+  padding: 12px 24px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-bottom: -1px;
+  transition: color 0.2s, border-color 0.2s;
+  font-family: var(--font-sans);
+}
+.tab-btn:hover { color: var(--foreground); }
+.tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Onboarding Card (empty state) ──────────────── */
+.onboarding-card {
+  text-align: center;
+  padding: 80px 40px;
+  background: var(--card);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  margin: 40px auto;
+  max-width: 480px;
+}
+.onboarding-card .onboard-icon {
+  width: 64px;
+  height: 64px;
+  color: var(--primary);
+  margin: 0 auto 20px;
+}
+.onboarding-card h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--foreground);
+}
+.onboarding-card p {
+  color: var(--muted-foreground);
+  font-size: 0.95rem;
+  margin-bottom: 28px;
+}
+
+/* ── Charts Grid (Overview tab) ─────────────────── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 28px;
+}
+@media (max-width: 768px) {
+  .charts-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Analytics Tab ───────────────────────────────── */
+.analytics-chart-card {
+  background: var(--card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 24px;
+}
+.analytics-chart-card h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+  margin-bottom: 20px;
+}
+
+.perf-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+.perf-card {
+  background: var(--card);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 20px 24px;
+}
+.perf-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-foreground);
+  margin-bottom: 8px;
+}
+.perf-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: 4px;
+}
+.perf-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.perf-card.best .perf-value { color: #22c55e; }
+.perf-card.worst .perf-value { color: #ef4444; }
+
+.empty-tab-msg {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted-foreground);
+  font-size: 0.95rem;
+}
+
+/* ── Watchlist Inline Tab ────────────────────────── */
+.watchlist-tab-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.watchlist-tab-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.watchlist-inline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.watchlist-inline-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.watchlist-inline-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+.wl-coin-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.wl-coin-logo-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+.wl-coin-info { flex: 1; min-width: 0; }
+.wl-coin-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wl-coin-symbol {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+.wl-coin-price {
+  text-align: right;
+}
+.wl-price-val {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--foreground);
+}
+.wl-price-change {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.wl-price-up { color: #22c55e; }
+.wl-price-down { color: #ef4444; }
+
+.wl-remove-btn {
+  background: none;
+  border: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+.wl-remove-btn:hover { color: #ef4444; }
