@@ -1,16 +1,16 @@
 /* Auth Pages Styling */
 
 .auth-container {
-    min-height: calc(100vh - 200px);
+    min-height: calc(100vh - 64px);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 40px 20px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    background: var(--background);
 }
 
 .auth-card {
-    background: #1e2a3a;
+    background: var(--card);
     border-radius: 20px;
     padding: 40px;
     width: 100%;
@@ -25,14 +25,14 @@
 }
 
 .auth-header h1 {
-    color: #ffffff;
+    color: var(--foreground);
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 10px;
 }
 
 .auth-header p {
-    color: #8b949e;
+    color: var(--muted-foreground);
     font-size: 1rem;
     margin: 0;
 }
@@ -50,7 +50,7 @@
 }
 
 .form-group label {
-    color: #c9d1d9;
+    color: var(--card-foreground);
     font-size: 0.9rem;
     font-weight: 500;
 }
@@ -64,7 +64,7 @@
 .input-icon {
     position: absolute;
     left: 15px;
-    color: #8b949e;
+    color: var(--muted-foreground);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -74,23 +74,23 @@
 .input-wrapper .form-control {
     width: 100%;
     padding: 14px 14px 14px 50px;
-    background: #0d1b2a;
-    border: 1px solid #30363d;
+    background: var(--input);
+    border: 1px solid var(--border);
     border-radius: 10px;
-    color: #ffffff;
+    color: var(--foreground);
     font-size: 1rem;
     transition: all 0.3s ease;
 }
 
 .input-wrapper .form-control::placeholder {
-    color: #6e7681;
+    color: var(--muted-foreground);
 }
 
 .input-wrapper .form-control:focus {
     outline: none;
-    border-color: #fd7e14;
-    box-shadow: 0 0 0 3px rgba(253, 126, 20, 0.2);
-    background: #0d1b2a;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    background: var(--input);
 }
 
 .form-options {
@@ -103,7 +103,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #8b949e;
+    color: var(--muted-foreground);
     font-size: 0.9rem;
     cursor: pointer;
 }
@@ -111,17 +111,17 @@
 .remember-me input[type="checkbox"] {
     width: 16px;
     height: 16px;
-    accent-color: #fd7e14;
+    accent-color: var(--primary);
     cursor: pointer;
 }
 
 .btn-auth {
     width: 100%;
     padding: 14px;
-    background: linear-gradient(135deg, #fd7e14 0%, #e55a00 100%);
+    background: var(--primary);
     border: none;
     border-radius: 10px;
-    color: #ffffff;
+    color: var(--primary-foreground);
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
@@ -130,9 +130,9 @@
 }
 
 .btn-auth:hover {
-    background: linear-gradient(135deg, #e55a00 0%, #cc4a00 100%);
+    background: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(253, 126, 20, 0.3);
+    box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
 }
 
 .btn-auth:active {
@@ -143,23 +143,23 @@
     text-align: center;
     margin-top: 25px;
     padding-top: 20px;
-    border-top: 1px solid #30363d;
+    border-top: 1px solid var(--border);
 }
 
 .auth-footer p {
-    color: #8b949e;
+    color: var(--muted-foreground);
     margin: 0;
 }
 
 .auth-footer a {
-    color: #fd7e14;
+    color: var(--primary);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s ease;
 }
 
 .auth-footer a:hover {
-    color: #ff9f43;
+    color: #fbbf24;
     text-decoration: underline;
 }
 
@@ -172,14 +172,14 @@
 }
 
 .alert-danger {
-    background: rgba(220, 53, 69, 0.15);
-    border: 1px solid rgba(220, 53, 69, 0.3);
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
     color: #f8d7da;
 }
 
 .alert-success {
-    background: rgba(25, 135, 84, 0.15);
-    border: 1px solid rgba(25, 135, 84, 0.3);
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.3);
     color: #d1e7dd;
 }
 
@@ -187,20 +187,20 @@
 .demo-credentials {
     margin-top: 20px;
     padding: 15px;
-    background: rgba(253, 126, 20, 0.1);
-    border: 1px solid rgba(253, 126, 20, 0.3);
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
     border-radius: 10px;
     text-align: center;
 }
 
 .demo-credentials p {
     margin: 5px 0;
-    color: #c9d1d9;
+    color: var(--card-foreground);
     font-size: 0.85rem;
 }
 
 .demo-credentials p:first-child {
-    color: #fd7e14;
+    color: var(--primary);
     margin-bottom: 10px;
 }
 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - CryptoPulse</title>
+    <link rel="stylesheet" href="/css/theme.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/other.css">
     <link rel="stylesheet" href="/css/auth.css">
@@ -12,7 +13,7 @@
     <%- include('../partials/header') %>
 
     <div class="auth-container">
-        <div class="auth-card">
+        <div class="auth-card animate-in">
             <div class="auth-header">
                 <h1>Welcome Back</h1>
                 <p>Sign in to access your portfolio</p>
@@ -31,7 +32,7 @@
             <% } %>
 
             <form action="/auth/login" method="POST" class="auth-form">
-                <div class="form-group">
+                <div class="form-group animate-in" style="transition-delay: 0.1s">
                     <label for="email">Email Address</label>
                     <div class="input-wrapper">
                         <span class="input-icon">
@@ -44,7 +45,7 @@
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group animate-in" style="transition-delay: 0.2s">
                     <label for="password">Password</label>
                     <div class="input-wrapper">
                         <span class="input-icon">
@@ -57,14 +58,14 @@
                     </div>
                 </div>
 
-                <div class="form-options">
+                <div class="form-options animate-in" style="transition-delay: 0.25s">
                     <label class="remember-me">
                         <input type="checkbox" name="remember">
                         <span>Remember me</span>
                     </label>
                 </div>
 
-                <button type="submit" class="btn-auth">
+                <button type="submit" class="btn-auth animate-in" style="transition-delay: 0.3s">
                     Login
                 </button>
             </form>
@@ -83,5 +84,6 @@
 
     <%- include('../partials/footer') %>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/observer.js"></script>
 </body>
 </html>
