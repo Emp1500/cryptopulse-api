@@ -1,64 +1,59 @@
-@import url('https://fonts.googleapis.com/css2?family=Cedarville+Cursive&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
-
-/* Your Custom Styles - Integrated */
 body {
-    background-color: #323539;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #C9D1D9;
+  background-color: var(--background);
+  font-family: var(--font-sans);
+  color: var(--foreground);
 }
 
 h1, h2, h3 {
-    color: #FFFFFF;
+  color: var(--foreground);
 }
 
 p {
-    font-size: 18px;
-    color: #C9D1D9;
+  font-size: 18px;
+  color: var(--muted-foreground);
 }
 
 .highlight-orange {
-    color: #fd7e14;
+  color: var(--primary);
 }
 
-/* Card styles from your homepage CSS */
 .custom-card {
-    background-color: #161b22; /* Darker card background for contrast */
-    border-radius: 20px;
-    padding: 2rem;
-    color: #C9D1D9;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  background-color: var(--card);
+  border-radius: 20px;
+  padding: 2rem;
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .custom-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-} 
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
 
-/* Section Title styles adapted from your CSS */
 .section-title {
-    font-size: 2.25rem; /* Equivalent to text-3xl */
-    font-weight: 700;
-    color: #FFFFFF;
-    margin-bottom: 0.5rem;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 0.5rem;
 }
 
 .section-subtitle {
-    font-size: 1.125rem; /* Equivalent to text-lg */
-    color: #C9D1D9;
-    max-width: 42rem; /* max-w-2xl */
-    margin-left: auto;
-    margin-right: auto;
+  font-size: 1.125rem;
+  color: var(--muted-foreground);
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.solCard{
-    margin-left: 30%;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+.solCard {
+  margin-left: 30%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
 }
 
-.bull{
-    margin-top: 50px;
+.bull {
+  margin-top: 50px;
 }
