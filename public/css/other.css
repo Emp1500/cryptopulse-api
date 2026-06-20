@@ -116,33 +116,33 @@
 .nav-user-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  border-radius: 999px;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  color: var(--foreground);
-  font-family: var(--font-sans);
+  border-radius: 50%;
+  transition: box-shadow 0.2s ease;
+}
+
+.nav-user-btn:hover .nav-avatar,
+.nav-user-btn:focus .nav-avatar {
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
 }
 
 .nav-avatar {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   background: var(--primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   color: var(--primary-foreground);
-}
-
-.nav-username {
-  color: var(--foreground);
-  font-size: 0.9rem;
-  font-weight: 500;
+  pointer-events: none;
+  user-select: none;
 }
 
 .nav-dropdown {
