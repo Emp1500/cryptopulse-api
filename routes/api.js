@@ -77,7 +77,8 @@ router.get('/markets', async (req, res) => {
         order: 'market_cap_desc',
         per_page: 100,
         page: 1,
-        sparkline: false
+        sparkline: true,
+        price_change_percentage: '24h'
       }
     });
 

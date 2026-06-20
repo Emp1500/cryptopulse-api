@@ -22,6 +22,14 @@
       </div>
     </div>
 
+    <div class="cat-tabs animate-in" style="transition-delay:0.12s">
+      <button class="cat-tab cat-tab--active" data-cat="all">All</button>
+      <button class="cat-tab" data-cat="layer1">Layer 1</button>
+      <button class="cat-tab" data-cat="defi">DeFi</button>
+      <button class="cat-tab" data-cat="stable">Stablecoins</button>
+      <button class="cat-tab" data-cat="meme">Meme</button>
+    </div>
+
     <div class="trending-cards animate-in" id="trending-cards" style="transition-delay:0.15s">
       <!-- Populated by markets.js -->
     </div>
@@ -55,13 +63,5 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/markets.js"></script>
   <script src="/js/observer.js"></script>
-  <script>
-    document.getElementById('market-search').addEventListener('input', function() {
-      var q = this.value.toLowerCase();
-      document.querySelectorAll('#market-data-body tr').forEach(function(row) {
-        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-      });
-    });
-  </script>
 </body>
 </html>
