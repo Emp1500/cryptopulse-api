@@ -16,6 +16,7 @@ const app = express();
 const path = require('path');
 const axios = require('axios');
 const logger = require('./config/logger');
+const supabase = require('./config/database');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -40,10 +41,15 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com", "cdnjs.cloudflare.com"],
       fontSrc: ["'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com"],
       imgSrc: ["'self'", "data:", "assets.coingecko.com", "coin-images.coingecko.com"],
-      connectSrc: ["'self'"]
+      connectSrc: ["'self'", "api.coingecko.com"]
     }
   }
 }));
+
+// Trust reverse proxy (Vercel, Heroku, etc.) so req.secure reflects HTTPS correctly.
+// Without this, express-session skips Set-Cookie when cookie.secure=true,
+// because Express sees internal HTTP and thinks the connection is not secure.
+app.set('trust proxy', 1);
 
 // Middleware
 app.set('view engine', 'ejs');
@@ -122,6 +128,38 @@ app.get('/', async (req, res) => {
       return res.render('index', { coins: cache.coins });
     }
     return res.status(500).send('Internal Server Error');
+  }
+});
+
+app.get('/dashboard', async (req, res) => {
+  try {
+    const now = Date.now();
+    let coins = [];
+    if (cache.coins && (now - cache.lastFetch < CACHE_DURATION)) {
+      coins = cache.coins;
+    } else {
+      const response = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
+        params: { vs_currency: 'usd', order: 'market_cap_desc', per_page: 10, page: 1, sparkline: false }
+      });
+      coins = response.data || [];
+      cache.coins = coins;
+      cache.lastFetch = now;
+    }
+
+    let watchlist = [];
+    if (req.session.user) {
+      const { data } = await supabase
+        .from('watchlist')
+        .select('*')
+        .eq('user_id', req.session.user.id)
+        .order('added_at', { ascending: true });
+      watchlist = data || [];
+    }
+
+    res.render('dashboard', { coins, watchlist });
+  } catch (error) {
+    logger.error(`Dashboard fetch failed: ${error.message}`);
+    res.render('dashboard', { coins: [], watchlist: [] });
   }
 });
 

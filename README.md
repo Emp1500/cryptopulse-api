@@ -136,28 +136,28 @@ Tab state is stored in the **URL hash** (`#overview`, `#holdings`, etc.) for dir
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                          Browser / Client                        │
+│                          Browser / Client                       │
 │                  EJS templates + Vanilla JS                     │
 └────────────────────────┬────────────────────────────────────────┘
                          │ HTTP
                          ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                     Express 5.x  (app.js)                        │
-│                                                                  │
-│  Middleware stack:                                               │
+│                     Express 5.x  (app.js)                       │
+│                                                                 │
+│  Middleware stack:                                              │
 │  Helmet (CSP) → express-session → user locals → routes          │
-│                                                                  │
-│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐    │
-│  │ /auth       │  │ /portfolio   │  │ /api + page routes  │    │
-│  │ login       │  │ dashboard    │  │ /api/markets        │    │
-│  │ register    │  │ holdings     │  │ /markets  /about    │    │
-│  │ logout      │  │ watchlist    │  │ /graphs   /news     │    │
-│  └──────┬──────┘  └──────┬───────┘  └────────┬────────────┘    │
-│         │                │                    │                  │
+│                                                                 │
+│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐     │
+│  │ /auth       │  │ /portfolio   │  │ /api + page routes  │     │
+│  │ login       │  │ dashboard    │  │ /api/markets        │     │
+│  │ register    │  │ holdings     │  │ /markets  /about    │     │
+│  │ logout      │  │ watchlist    │  │ /graphs   /news     │     │
+│  └──────┬──────┘  └──────┬───────┘  └────────┬────────────┘     │
+│         │                │                    │                 │
 │  ┌──────▼────────────────▼────────────────────▼──────────────┐  │
-│  │               isAuthenticated middleware                   │  │
-│  └────────────────────────────────────────────────────────────┘  │
-│                                                                  │
+│  │               isAuthenticated middleware                  │  │
+│  └───────────────────────────────────────────────────────────┘  │
+│                                                                 │
 │  ┌─────────────────────────────────┐  ┌───────────────────────┐ │
 │  │   In-memory cache (5-min TTL)   │  │  Winston logger       │ │
 │  │   Stale-cache fallback on err   │  │  Sentry error handler │ │
@@ -168,14 +168,14 @@ Tab state is stored in the **URL hash** (`#overview`, `#holdings`, etc.) for dir
         │                        │
         ▼                        ▼
 ┌───────────────┐      ┌──────────────────────┐
-│  CoinGecko    │      │  Supabase             │
-│  API          │      │  (PostgreSQL)          │
-│               │      │                        │
-│  /coins/      │      │  users                 │
-│   markets     │      │  sessions              │
-│  /simple/     │      │  portfolio_holdings    │
-│   price       │      │  watchlist             │
-└───────────────┘      └──────────────────────-┘
+│  CoinGecko    │      │  Supabase            │
+│  API          │      │  (PostgreSQL)        │
+│               │      │                      │
+│  /coins/      │      │  users               │
+│   markets     │      │  sessions            │
+│  /simple/     │      │  portfolio_holdings  │
+│   price       │      │  watchlist           │
+└───────────────┘      └──────────────────────┘
 ```
 
 ### Portfolio dashboard data flow

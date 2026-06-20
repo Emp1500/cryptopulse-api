@@ -83,14 +83,14 @@ describe('POST /auth/register', () => {
 });
 
 describe('POST /auth/login', () => {
-  test('logs in with valid credentials and redirects to portfolio', async () => {
+  test('logs in with valid credentials and redirects to dashboard', async () => {
     const user = await createTestUser({ email: 'test-login@example.com', password: 'password123' });
     const res = await request(app)
       .post('/auth/login')
       .type('form')
       .send({ email: user.email, password: 'password123' });
     expect(res.status).toBe(302);
-    expect(res.headers.location).toBe('/portfolio');
+    expect(res.headers.location).toBe('/dashboard');
   });
 
   test('rejects wrong password', async () => {

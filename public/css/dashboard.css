@@ -1,0 +1,524 @@
+/* ── Dashboard Page ─────────────────────────────────────────── */
+.dash-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* Page Header */
+.dash-header {
+  margin-bottom: 1.5rem;
+}
+
+.dash-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dash-title {
+  font-family: 'Orbitron', 'Inter', sans-serif;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 900;
+  color: var(--foreground);
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.dash-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: var(--primary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.75); }
+}
+
+.dash-subtitle {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  margin: 0.35rem 0 0;
+}
+
+/* ── Coin Selector Strip ────────────────────────────────────── */
+.coin-selector {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.coin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.coin-pill:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.coin-pill.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #000;
+}
+
+.pill-img {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+/* ── Bloomberg Split Row ────────────────────────────────────── */
+.bloomberg-row {
+  display: grid;
+  grid-template-columns: 65fr 35fr;
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+/* Chart Column */
+.chart-col {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chart-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chart-coin-info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chart-coin-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.chart-coin-symbol {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.live-price-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-up);
+  display: inline-block;
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+.chart-live-price {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-price-change {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 300px;
+}
+
+.chart-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  height: 100%;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+}
+
+.spinner-ring {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.chart-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  height: 100%;
+  color: var(--muted-foreground);
+  font-size: 0.85rem;
+  background: rgba(245, 158, 11, 0.05);
+  border-radius: 8px;
+  border: 1px dashed rgba(245, 158, 11, 0.25);
+}
+
+.btn-retry {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 0.3rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-retry:hover {
+  background: rgba(245, 158, 11, 0.1);
+}
+
+#bigChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Time filter buttons */
+.time-filters {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.time-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.time-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.time-btn.active {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Stat Cards Column */
+.stat-cards-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  height: 100%;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--primary);
+  border-radius: 12px;
+  padding: 1.1rem 1.1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stat-card-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.stat-card-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-card-change {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* ── Newspaper Row ──────────────────────────────────────────── */
+.newspaper-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.newspaper-col {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.newspaper-header {
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 0.6rem;
+}
+
+.newspaper-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+/* Coin list */
+.coin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.coin-list-head {
+  display: grid;
+  grid-template-columns: 28px 1fr 90px 65px 90px;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.coin-list-head:has(+ .coin-list-row span.cl-change:last-child) {
+  grid-template-columns: 1fr 90px 65px;
+}
+
+.coin-list-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 90px 65px 90px;
+  padding: 0.55rem 0.5rem;
+  border-radius: 6px;
+  align-items: center;
+  font-size: 0.85rem;
+  transition: background 0.15s, border-left 0.15s;
+  border-left: 3px solid transparent;
+  cursor: default;
+}
+
+.coin-list-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.coin-list-row:hover {
+  background: rgba(245, 158, 11, 0.06);
+  border-left-color: var(--primary);
+}
+
+.cl-rank {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.cl-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+.cl-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cl-logo-placeholder {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--foreground);
+  flex-shrink: 0;
+}
+
+.cl-coin-name {
+  font-weight: 600;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cl-coin-symbol {
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+}
+
+.cl-price {
+  text-align: right;
+  font-weight: 600;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+}
+
+.cl-change {
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cl-mcap {
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Watchlist column — no market cap column */
+.newspaper-col:last-child .coin-list-head,
+.newspaper-col:last-child .coin-list-row {
+  grid-template-columns: 1fr 90px 65px;
+}
+
+.change-up   { color: var(--color-up); }
+.change-down { color: var(--color-down); }
+
+.newspaper-footer-link {
+  font-size: 0.8rem;
+  color: var(--primary);
+  text-decoration: none;
+  margin-top: auto;
+  transition: opacity 0.15s;
+}
+
+.newspaper-footer-link:hover { opacity: 0.75; }
+
+/* Login prompt */
+.newspaper-login-prompt {
+  margin-top: auto;
+  padding: 0.9rem;
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px dashed rgba(245, 158, 11, 0.25);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.newspaper-login-prompt p {
+  font-size: 0.82rem;
+  color: var(--muted-foreground);
+  margin: 0 0 0.6rem;
+}
+
+.btn-login-prompt {
+  font-size: 0.8rem;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.15s;
+}
+
+.btn-login-prompt:hover { opacity: 0.75; }
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .bloomberg-row {
+    grid-template-columns: 1fr;
+  }
+  .stat-card-grid {
+    grid-template-columns: 1fr 1fr;
+    height: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .newspaper-row {
+    grid-template-columns: 1fr;
+  }
+  .coin-list-head,
+  .coin-list-row {
+    grid-template-columns: 24px 1fr 80px 58px !important;
+  }
+  .cl-mcap { display: none; }
+}
+
+@media (max-width: 480px) {
+  .stat-card-grid {
+    grid-template-columns: 1fr;
+  }
+  .dash-page {
+    padding: 1rem 1rem 3rem;
+  }
+  .coin-list-head,
+  .coin-list-row {
+    grid-template-columns: 1fr 80px 58px !important;
+  }
+  .cl-rank { display: none; }
+}

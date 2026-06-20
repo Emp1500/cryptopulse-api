@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Dashboard — CryptoPulse</title>
+  <link rel="stylesheet" href="/css/theme.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/other.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <%- include('partials/header') %>
+
+  <div class="dash-page">
+
+    <!-- Page Header -->
+    <div class="dash-header">
+      <div class="dash-title-row">
+        <h1 class="dash-title">Market Dashboard</h1>
+        <span class="dash-live-badge">
+          <span class="live-dot"></span>LIVE
+        </span>
+      </div>
+      <p class="dash-subtitle">Real-time global crypto data, updated every 60s</p>
+    </div>
+
+    <!-- Coin Selector Strip -->
+    <div class="coin-selector" id="coinSelector">
+      <% const selectorCoins = coins.slice(0, 7); %>
+      <% selectorCoins.forEach((coin, i) => { %>
+        <button
+          class="coin-pill <%= i === 0 ? 'active' : '' %>"
+          data-id="<%= coin.id %>"
+          data-symbol="<%= coin.symbol.toUpperCase() %>"
+          data-name="<%= coin.name %>"
+          data-color="#f59e0b">
+          <img src="<%= coin.image %>" alt="<%= coin.symbol %>" class="pill-img" onerror="this.style.display='none'">
+          <%= coin.symbol.toUpperCase() %>
+        </button>
+      <% }) %>
+    </div>
+
+    <!-- Bloomberg Split: Chart (left) + Stat Cards (right) -->
+    <div class="bloomberg-row">
+
+      <!-- Left: Big Chart -->
+      <div class="chart-col">
+        <div class="chart-top">
+          <div class="chart-coin-info">
+            <span class="chart-coin-name" id="chartCoinName">Bitcoin</span>
+            <span class="chart-coin-symbol" id="chartCoinSymbol">BTC</span>
+            <span class="live-price-dot"></span>
+            <span class="chart-live-price" id="chartLivePrice">--</span>
+            <span class="chart-price-change" id="chartPriceChange"></span>
+          </div>
+        </div>
+        <div class="chart-wrap" id="chartWrap">
+          <div class="chart-spinner" id="chartSpinner">
+            <div class="spinner-ring"></div>
+            <span>Loading chart…</span>
+          </div>
+          <div class="chart-error" id="chartError" style="display:none">
+            <span>Failed to load chart data.</span>
+            <button class="btn-retry" id="btnRetry">Retry</button>
+          </div>
+          <canvas id="bigChart" style="display:none"></canvas>
+        </div>
+        <div class="time-filters">
+          <button class="time-btn active" data-days="1">1D</button>
+          <button class="time-btn" data-days="7">7D</button>
+          <button class="time-btn" data-days="30">30D</button>
+          <button class="time-btn" data-days="90">90D</button>
+          <button class="time-btn" data-days="365">1Y</button>
+        </div>
+      </div>
+
+      <!-- Right: Global Stat Cards -->
+      <div class="stat-cards-col">
+        <div class="stat-card-grid">
+          <div class="stat-card">
+            <div class="stat-card-label">Total Market Cap</div>
+            <div class="stat-card-value" id="statMarketCap">--</div>
+            <div class="stat-card-change" id="statMarketCapChange"></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">BTC Dominance</div>
+            <div class="stat-card-value" id="statBtcDominance">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">24h Volume</div>
+            <div class="stat-card-value" id="statVolume">--</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-label">Active Coins</div>
+            <div class="stat-card-value" id="statActiveCoins">--</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /bloomberg-row -->
+
+    <!-- Newspaper Coin List -->
+    <div class="newspaper-row">
+
+      <!-- Left: Top 10 Markets -->
+      <div class="newspaper-col">
+        <div class="newspaper-header">
+          <h2 class="newspaper-title">Top 10 Markets</h2>
+        </div>
+        <div class="coin-list">
+          <div class="coin-list-head">
+            <span class="cl-rank">#</span>
+            <span class="cl-name">Coin</span>
+            <span class="cl-price">Price</span>
+            <span class="cl-change">24h %</span>
+            <span class="cl-mcap">Market Cap</span>
+          </div>
+          <% coins.slice(0, 10).forEach((coin, i) => { %>
+            <div class="coin-list-row">
+              <span class="cl-rank"><%= i + 1 %></span>
+              <span class="cl-name">
+                <img src="<%= coin.image %>" alt="<%= coin.symbol %>" class="cl-logo" onerror="this.style.display='none'">
+                <span class="cl-coin-name"><%= coin.name %></span>
+                <span class="cl-coin-symbol"><%= coin.symbol.toUpperCase() %></span>
+              </span>
+              <span class="cl-price">$<%= coin.current_price >= 1 ? coin.current_price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : coin.current_price.toFixed(4) %></span>
+              <span class="cl-change <%= coin.price_change_percentage_24h >= 0 ? 'change-up' : 'change-down' %>">
+                <%= coin.price_change_percentage_24h >= 0 ? '+' : '' %><%= coin.price_change_percentage_24h ? coin.price_change_percentage_24h.toFixed(2) : '0.00' %>%
+              </span>
+              <span class="cl-mcap">$<%= coin.market_cap ? (coin.market_cap >= 1e9 ? (coin.market_cap/1e9).toFixed(1)+'B' : (coin.market_cap/1e6).toFixed(0)+'M') : '--' %></span>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Right: Watchlist or Trending -->
+      <div class="newspaper-col">
+        <% if (typeof user !== 'undefined' && user && watchlist && watchlist.length > 0) { %>
+          <div class="newspaper-header">
+            <h2 class="newspaper-title">Your Watchlist</h2>
+          </div>
+          <div class="coin-list">
+            <div class="coin-list-head">
+              <span class="cl-name">Coin</span>
+              <span class="cl-price">Price</span>
+              <span class="cl-change">24h %</span>
+            </div>
+            <% watchlist.forEach(coin => { %>
+              <div class="coin-list-row">
+                <span class="cl-name">
+                  <% if (coin.image) { %>
+                    <img src="<%= coin.image %>" alt="<%= coin.symbol %>" class="cl-logo" onerror="this.style.display='none'">
+                  <% } else { %>
+                    <span class="cl-logo-placeholder"><%= coin.symbol.charAt(0) %></span>
+                  <% } %>
+                  <span class="cl-coin-name"><%= coin.name %></span>
+                  <span class="cl-coin-symbol"><%= coin.symbol %></span>
+                </span>
+                <span class="cl-price">--</span>
+                <span class="cl-change">--</span>
+              </div>
+            <% }) %>
+          </div>
+          <a href="/portfolio#watchlist" class="newspaper-footer-link">Manage watchlist →</a>
+        <% } else { %>
+          <div class="newspaper-header">
+            <h2 class="newspaper-title">Trending Today</h2>
+          </div>
+          <div class="coin-list">
+            <div class="coin-list-head">
+              <span class="cl-rank">#</span>
+              <span class="cl-name">Coin</span>
+              <span class="cl-price">Price</span>
+              <span class="cl-change">24h %</span>
+            </div>
+            <% coins.slice(0, 5).forEach((coin, i) => { %>
+              <div class="coin-list-row">
+                <span class="cl-rank"><%= i + 1 %></span>
+                <span class="cl-name">
+                  <img src="<%= coin.image %>" alt="<%= coin.symbol %>" class="cl-logo" onerror="this.style.display='none'">
+                  <span class="cl-coin-name"><%= coin.name %></span>
+                  <span class="cl-coin-symbol"><%= coin.symbol.toUpperCase() %></span>
+                </span>
+                <span class="cl-price">$<%= coin.current_price >= 1 ? coin.current_price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : coin.current_price.toFixed(4) %></span>
+                <span class="cl-change <%= coin.price_change_percentage_24h >= 0 ? 'change-up' : 'change-down' %>">
+                  <%= coin.price_change_percentage_24h >= 0 ? '+' : '' %><%= coin.price_change_percentage_24h ? coin.price_change_percentage_24h.toFixed(2) : '0.00' %>%
+                </span>
+              </div>
+            <% }) %>
+          </div>
+          <% if (typeof user === 'undefined' || !user) { %>
+            <div class="newspaper-login-prompt">
+              <p>Log in to see your personal watchlist here.</p>
+              <a href="/auth/login" class="btn-login-prompt">Login →</a>
+            </div>
+          <% } %>
+        <% } %>
+      </div>
+
+    </div><!-- /newspaper-row -->
+
+  </div><!-- /dash-page -->
+
+  <%- include('partials/footer') %>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/observer.js"></script>
+  <script>
+    // ── State ──────────────────────────────────────────────────────
+    let activeCoinId = 'bitcoin';
+    let activeCoinSymbol = 'BTC';
+    let activeCoinName = 'Bitcoin';
+    let activeDays = '30';
+    let chartInstance = null;
+
+    // ── Helpers ────────────────────────────────────────────────────
+    function fmt(n, dec = 2) {
+      if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T';
+      if (n >= 1e9)  return '$' + (n / 1e9).toFixed(2)  + 'B';
+      if (n >= 1e6)  return '$' + (n / 1e6).toFixed(2)  + 'M';
+      return '$' + n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    }
+
+    function fmtPrice(p) {
+      return p >= 1 ? '$' + p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '$' + p.toFixed(6);
+    }
+
+    // ── Global Stats ────────────────────────────────────────────────
+    async function loadGlobalStats() {
+      try {
+        const res = await fetch('https://api.coingecko.com/api/v3/global');
+        if (!res.ok) throw new Error('Failed');
+        const { data } = await res.json();
+        document.getElementById('statMarketCap').textContent = fmt(data.total_market_cap.usd, 0);
+        const mcChange = data.market_cap_change_percentage_24h_usd;
+        const mcEl = document.getElementById('statMarketCapChange');
+        mcEl.textContent = (mcChange >= 0 ? '+' : '') + mcChange.toFixed(2) + '% 24h';
+        mcEl.className = 'stat-card-change ' + (mcChange >= 0 ? 'change-up' : 'change-down');
+        document.getElementById('statBtcDominance').textContent = data.market_cap_percentage.btc.toFixed(1) + '%';
+        document.getElementById('statVolume').textContent = fmt(data.total_volume.usd, 0);
+        document.getElementById('statActiveCoins').textContent = data.active_cryptocurrencies.toLocaleString();
+      } catch {
+        ['statMarketCap','statBtcDominance','statVolume','statActiveCoins'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el.textContent === '--') el.textContent = '--';
+        });
+      }
+    }
+
+    // ── Chart ───────────────────────────────────────────────────────
+    async function loadChart(coinId, coinName, coinSymbol, days) {
+      const canvas = document.getElementById('bigChart');
+      const spinner = document.getElementById('chartSpinner');
+      const errEl = document.getElementById('chartError');
+
+      spinner.style.display = 'flex';
+      canvas.style.display = 'none';
+      errEl.style.display = 'none';
+
+      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+      document.getElementById('chartCoinName').textContent = coinName;
+      document.getElementById('chartCoinSymbol').textContent = coinSymbol;
+
+      try {
+        const [chartRes, priceRes] = await Promise.all([
+          fetch(`https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${days}`),
+          fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd&include_24hr_change=true`)
+        ]);
+
+        if (!chartRes.ok) throw new Error('chart');
+        if (!priceRes.ok) throw new Error('price');
+
+        const { prices } = await chartRes.json();
+        const priceData = await priceRes.json();
+        const coinPrice = priceData[coinId];
+        if (coinPrice) {
+          document.getElementById('chartLivePrice').textContent = fmtPrice(coinPrice.usd);
+          const ch = coinPrice.usd_24h_change;
+          const chEl = document.getElementById('chartPriceChange');
+          chEl.textContent = (ch >= 0 ? '+' : '') + ch.toFixed(2) + '% (24h)';
+          chEl.className = 'chart-price-change ' + (ch >= 0 ? 'change-up' : 'change-down');
+        }
+
+        const dInt = parseInt(days);
+        const dateFmt = dInt === 1
+          ? { hour: '2-digit', minute: '2-digit' }
+          : dInt <= 7
+            ? { weekday: 'short', hour: '2-digit' }
+            : dInt <= 90
+              ? { month: 'short', day: 'numeric' }
+              : { month: 'short', year: '2-digit' };
+
+        const rate = dInt === 1 ? 1 : dInt <= 7 ? 2 : dInt <= 30 ? 4 : dInt <= 90 ? 8 : 12;
+        const sampled = prices.filter((_, i) => i % rate === 0);
+        const labels = sampled.map(p => new Date(p[0]).toLocaleString('en-US', dateFmt));
+        const values = sampled.map(p => p[1]);
+
+        const ctx = canvas.getContext('2d');
+        const grad = ctx.createLinearGradient(0, 0, 0, 320);
+        grad.addColorStop(0, 'rgba(245,158,11,0.28)');
+        grad.addColorStop(1, 'rgba(245,158,11,0)');
+
+        spinner.style.display = 'none';
+        canvas.style.display = 'block';
+
+        chartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              data: values,
+              borderColor: '#f59e0b',
+              backgroundColor: grad,
+              borderWidth: 2,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 0,
+              pointHoverRadius: 6,
+              pointHoverBackgroundColor: '#f59e0b',
+              pointHoverBorderColor: '#000',
+              pointHoverBorderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(20,20,20,0.95)',
+                titleColor: '#a3a3a3',
+                bodyColor: '#e5e5e5',
+                borderColor: '#f59e0b',
+                borderWidth: 1,
+                padding: 12,
+                displayColors: false,
+                callbacks: {
+                  label: ctx => fmtPrice(ctx.raw)
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: {
+                  color: '#a3a3a3',
+                  font: { size: 11 },
+                  maxTicksLimit: 8,
+                  maxRotation: 0
+                }
+              },
+              y: {
+                position: 'right',
+                grid: { color: 'rgba(255,255,255,0.04)' },
+                ticks: {
+                  color: '#a3a3a3',
+                  font: { size: 11 },
+                  maxTicksLimit: 6,
+                  callback: v => v >= 1000 ? '$' + (v/1000).toFixed(1) + 'K' : v >= 1 ? '$' + v.toFixed(0) : '$' + v.toFixed(4)
+                }
+              }
+            }
+          }
+        });
+      } catch {
+        spinner.style.display = 'none';
+        errEl.style.display = 'flex';
+      }
+    }
+
+    // ── Coin selector ───────────────────────────────────────────────
+    document.querySelectorAll('.coin-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.coin-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCoinId = btn.dataset.id;
+        activeCoinSymbol = btn.dataset.symbol;
+        activeCoinName = btn.dataset.name;
+        loadChart(activeCoinId, activeCoinName, activeCoinSymbol, activeDays);
+      });
+    });
+
+    // ── Time filter ─────────────────────────────────────────────────
+    document.querySelectorAll('.time-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeDays = btn.dataset.days;
+        loadChart(activeCoinId, activeCoinName, activeCoinSymbol, activeDays);
+      });
+    });
+
+    // ── Retry button ────────────────────────────────────────────────
+    document.getElementById('btnRetry').addEventListener('click', () => {
+      loadChart(activeCoinId, activeCoinName, activeCoinSymbol, activeDays);
+    });
+
+    // ── Init ─────────────────────────────────────────────────────────
+    loadGlobalStats();
+    loadChart('bitcoin', 'Bitcoin', 'BTC', '30');
+
+    // Refresh global stats every 60s
+    setInterval(loadGlobalStats, 60000);
+  </script>
+</body>
+</html>

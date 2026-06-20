@@ -6,10 +6,11 @@
 
   <ul class="nav-links">
     <li><a href="/" class="nav-link">Home</a></li>
-    <% if (typeof user !== 'undefined' && user) { %>
-      <li><a href="/portfolio" class="nav-link">Dashboard</a></li>
-    <% } %>
+    <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
     <li><a href="/markets" class="nav-link">Market</a></li>
+    <% if (typeof user !== 'undefined' && user) { %>
+      <li><a href="/portfolio" class="nav-link">Portfolio</a></li>
+    <% } %>
     <li><a href="/about" class="nav-link">About</a></li>
   </ul>
 

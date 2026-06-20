@@ -31,7 +31,7 @@ const registerValidation = [
 
 // GET /auth/login
 router.get('/login', (req, res) => {
-  if (req.session.user) return res.redirect('/portfolio');
+  if (req.session.user) return res.redirect('/dashboard');
   res.render('auth/login', {
     error: null,
     success: req.query.registered ? 'Account created successfully! Please login.' : null
@@ -68,13 +68,13 @@ router.post('/login', authLimiter, loginValidation, async (req, res) => {
       logger.error(`Session save error on login: ${err}`);
       return res.render('auth/login', { error: 'Login failed. Please try again.', success: null });
     }
-    res.redirect('/portfolio');
+    res.redirect('/dashboard');
   });
 });
 
 // GET /auth/register
 router.get('/register', (req, res) => {
-  if (req.session.user) return res.redirect('/portfolio');
+  if (req.session.user) return res.redirect('/dashboard');
   res.render('auth/register', { error: null });
 });
 

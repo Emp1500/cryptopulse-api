@@ -13,7 +13,7 @@ const isNotAuthenticated = (req, res, next) => {
   if (!req.session.user) {
     return next();
   }
-  res.redirect('/portfolio');
+  res.redirect('/dashboard');
 };
 
 module.exports = {
