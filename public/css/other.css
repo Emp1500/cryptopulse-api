@@ -125,6 +125,10 @@
   transition: box-shadow 0.2s ease;
 }
 
+.nav-user-btn.dropdown-toggle::after {
+  display: none;
+}
+
 .nav-user-btn:hover .nav-avatar,
 .nav-user-btn:focus .nav-avatar {
   box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
