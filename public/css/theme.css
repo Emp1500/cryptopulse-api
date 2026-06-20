@@ -1,43 +1,49 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --card: #262626;
+  --card: #1e1e1e;
   --ring: #f59e0b;
-  --input: #404040;
-  --muted: #262626;
-  --accent: #92400e;
-  --border: #404040;
+  --input: #2a2a2a;
+  --muted: #1e1e1e;
+  --accent: #8B5CF6;
+  --border: #2a2a2a;
   --chart-1: #fbbf24;
   --chart-2: #d97706;
   --chart-3: #92400e;
   --chart-4: #b45309;
   --chart-5: #92400e;
-  --popover: #262626;
+  --popover: #1e1e1e;
   --primary: #f59e0b;
   --sidebar: #0f0f0f;
-  --secondary: #262626;
+  --secondary: #1e1e1e;
   --background: #171717;
   --foreground: #e5e5e5;
   --destructive: #ef4444;
   --sidebar-ring: #f59e0b;
-  --sidebar-accent: #92400e;
-  --sidebar-border: #404040;
+  --sidebar-accent: #8B5CF6;
+  --sidebar-border: #2a2a2a;
   --card-foreground: #e5e5e5;
   --sidebar-primary: #f59e0b;
   --muted-foreground: #a3a3a3;
-  --accent-foreground: #fde68a;
+  --accent-foreground: #ffffff;
   --popover-foreground: #e5e5e5;
   --primary-foreground: #000000;
   --sidebar-foreground: #e5e5e5;
   --secondary-foreground: #e5e5e5;
   --destructive-foreground: #ffffff;
-  --sidebar-accent-foreground: #fde68a;
+  --sidebar-accent-foreground: #ffffff;
   --sidebar-primary-foreground: #ffffff;
-  --radius: 0.375rem;
+  --radius: 0.5rem;
   --font-sans: Inter, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
   --color-up: #22c55e;
   --color-down: #ef4444;
+
+  /* Glass & glow system */
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --shadow-glow: 0 0 20px rgba(245, 158, 11, 0.12);
 }
 
 *, *::before, *::after {
@@ -50,6 +56,7 @@ body {
   font-family: var(--font-sans);
   margin: 0;
   padding: 0;
+  padding-top: 64px; /* offset for fixed header — Task 2 */
 }
 
 .animate-in {
