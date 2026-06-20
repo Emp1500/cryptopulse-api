@@ -16,12 +16,12 @@
 
   <div class="nav-auth">
     <% if (typeof user !== 'undefined' && user) { %>
-      <div class="nav-user dropdown">
-        <button class="nav-user-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User menu">
+      <div class="nav-user" id="navUserMenu">
+        <button class="nav-user-btn" id="navUserBtn" aria-label="User menu" aria-expanded="false" aria-haspopup="true">
           <span class="nav-avatar"><%= user.name.charAt(0).toUpperCase() %></span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end nav-dropdown">
-          <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>
+        <ul class="nav-dropdown" id="navUserDropdown" role="menu">
+          <li><a class="nav-dropdown-item" href="/auth/logout" role="menuitem">Logout</a></li>
         </ul>
       </div>
     <% } else { %>
@@ -57,5 +57,26 @@
     var open = navLinks.classList.toggle('nav-links--open');
     hamburger.setAttribute('aria-expanded', open);
   });
+
+  // User avatar dropdown
+  var userBtn = document.getElementById('navUserBtn');
+  var userDropdown = document.getElementById('navUserDropdown');
+  if (userBtn && userDropdown) {
+    userBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = userDropdown.classList.toggle('nav-dropdown--open');
+      userBtn.setAttribute('aria-expanded', open);
+    });
+    document.addEventListener('click', function () {
+      userDropdown.classList.remove('nav-dropdown--open');
+      if (userBtn) userBtn.setAttribute('aria-expanded', 'false');
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        userDropdown.classList.remove('nav-dropdown--open');
+        userBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
 })();
 </script>
