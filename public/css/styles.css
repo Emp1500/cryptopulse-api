@@ -2,7 +2,9 @@
 .hero-section {
   padding: 5rem 2rem;
   background: var(--background);
-  background-image: radial-gradient(ellipse 60% 50% at 70% 50%, rgba(245, 158, 11, 0.12), transparent);
+  background-image:
+    radial-gradient(ellipse 50% 60% at 80% 20%, rgba(245, 158, 11, 0.12), transparent),
+    radial-gradient(ellipse 40% 50% at 20% 80%, rgba(139, 92, 246, 0.08), transparent);
   overflow: hidden;
 }
 
@@ -50,7 +52,7 @@
   background: var(--primary);
   color: var(--primary-foreground);
   border: none;
-  border-radius: var(--radius);
+  border-radius: 999px;
   font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
@@ -64,12 +66,28 @@
   color: var(--primary-foreground);
 }
 
+@keyframes shimmer-once {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.btn-primary-filled {
+  background-image: linear-gradient(
+    105deg,
+    var(--primary) 40%,
+    rgba(255, 255, 255, 0.25) 50%,
+    var(--primary) 60%
+  );
+  background-size: 200% auto;
+  animation: shimmer-once 0.8s ease 0.4s 1;
+}
+
 .btn-primary-outline {
   padding: 0.65rem 1.5rem;
   background: transparent;
   color: var(--primary);
   border: 1px solid var(--primary);
-  border-radius: var(--radius);
+  border-radius: 999px;
   font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
@@ -237,6 +255,13 @@
   flex-shrink: 0;
 }
 
+.testimonial-card:hover {
+  border-color: var(--glass-border);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
 .testimonial-header {
   display: flex;
   align-items: center;
@@ -297,8 +322,8 @@
 }
 
 .why-card {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius);
   padding: 2rem;
 }
