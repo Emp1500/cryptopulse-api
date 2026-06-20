@@ -1,22 +1,28 @@
 /* Auth Pages Styling */
 
+/* ── Auth page background ── */
 .auth-container {
     min-height: calc(100vh - 64px);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px 20px;
-    background: var(--background);
+    padding: 2rem 1rem;
+    background-image:
+        radial-gradient(ellipse 50% 60% at 80% 20%, rgba(245, 158, 11, 0.1), transparent),
+        radial-gradient(ellipse 40% 50% at 20% 80%, rgba(139, 92, 246, 0.07), transparent);
 }
 
+/* ── Glass card ── */
 .auth-card {
-    background: var(--card);
-    border-radius: 20px;
-    padding: 40px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: calc(var(--radius) * 2);
+    box-shadow: var(--shadow-glow);
+    padding: 2.5rem;
     width: 100%;
     max-width: 420px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .auth-header {
@@ -92,6 +98,62 @@
     box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
     background: var(--input);
 }
+
+/* ── Input fields (glass style) ── */
+.form-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.6rem 0.9rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.form-input::placeholder {
+    color: var(--muted-foreground);
+}
+
+/* ── Password toggle button ── */
+.pw-toggle {
+    position: absolute;
+    right: 0.65rem;
+    background: none;
+    border: none;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0.25rem;
+    transition: color 0.15s ease;
+}
+
+.pw-toggle:hover { color: var(--foreground); }
+
+/* ── Submit button (pill style) ── */
+.btn-auth-submit {
+    width: 100%;
+    min-height: 44px;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border: none;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.btn-auth-submit:hover { opacity: 0.88; }
 
 .form-options {
     display: flex;
