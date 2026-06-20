@@ -154,6 +154,52 @@ app.get('/dashboard', async (req, res) => {
         .eq('user_id', req.session.user.id)
         .order('added_at', { ascending: true });
       watchlist = data || [];
+
+      if (watchlist.length > 0) {
+        // Build price map from already-fetched top 10 coins
+        const topPrices = {};
+        coins.forEach(c => {
+          topPrices[c.id] = {
+            current_price: c.current_price,
+            price_change_percentage_24h: c.price_change_percentage_24h
+          };
+        });
+
+        // Fetch prices for watchlist coins not in top 10
+        const missing = watchlist
+          .filter(w => !topPrices[w.coin_id])
+          .map(w => w.coin_id);
+
+        let extraPrices = {};
+        if (missing.length > 0) {
+          try {
+            const priceRes = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+              params: {
+                ids: missing.join(','),
+                vs_currencies: 'usd',
+                include_24hr_change: true
+              }
+            });
+            Object.entries(priceRes.data).forEach(([id, val]) => {
+              extraPrices[id] = {
+                current_price: val.usd,
+                price_change_percentage_24h: val.usd_24h_change
+              };
+            });
+          } catch (e) {
+            logger.warn('Watchlist supplemental price fetch failed: ' + e.message);
+          }
+        }
+
+        // Merge prices into watchlist rows
+        watchlist = watchlist.map(w => {
+          const p = topPrices[w.coin_id] || extraPrices[w.coin_id] || {};
+          return Object.assign({}, w, {
+            current_price: p.current_price != null ? p.current_price : null,
+            price_change_percentage_24h: p.price_change_percentage_24h != null ? p.price_change_percentage_24h : null
+          });
+        });
+      }
     }
 
     res.render('dashboard', { coins, watchlist });

@@ -83,20 +83,20 @@
         <div class="stat-card-grid">
           <div class="stat-card">
             <div class="stat-card-label">Total Market Cap</div>
-            <div class="stat-card-value" id="statMarketCap">--</div>
+            <div class="stat-card-value" id="statMarketCap" style="font-family:var(--font-mono)">--</div>
             <div class="stat-card-change" id="statMarketCapChange"></div>
           </div>
           <div class="stat-card">
             <div class="stat-card-label">BTC Dominance</div>
-            <div class="stat-card-value" id="statBtcDominance">--</div>
+            <div class="stat-card-value" id="statBtcDominance" style="font-family:var(--font-mono)">--</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-label">24h Volume</div>
-            <div class="stat-card-value" id="statVolume">--</div>
+            <div class="stat-card-value" id="statVolume" style="font-family:var(--font-mono)">--</div>
           </div>
           <div class="stat-card">
             <div class="stat-card-label">Active Coins</div>
-            <div class="stat-card-value" id="statActiveCoins">--</div>
+            <div class="stat-card-value" id="statActiveCoins" style="font-family:var(--font-mono)">--</div>
           </div>
         </div>
       </div>
@@ -160,8 +160,18 @@
                   <span class="cl-coin-name"><%= coin.name %></span>
                   <span class="cl-coin-symbol"><%= coin.symbol %></span>
                 </span>
-                <span class="cl-price">--</span>
-                <span class="cl-change">--</span>
+                <span class="cl-price" style="font-family:var(--font-mono)"><%=
+                  coin.current_price != null
+                    ? '$' + (coin.current_price >= 1
+                        ? coin.current_price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+                        : coin.current_price.toFixed(4))
+                    : '--'
+                %></span>
+                <span class="cl-change <%= coin.price_change_percentage_24h != null ? (coin.price_change_percentage_24h >= 0 ? 'change-up' : 'change-down') : '' %>"><%=
+                  coin.price_change_percentage_24h != null
+                    ? (coin.price_change_percentage_24h >= 0 ? '+' : '') + coin.price_change_percentage_24h.toFixed(2) + '%'
+                    : '--'
+                %></span>
               </div>
             <% }) %>
           </div>
@@ -340,6 +350,7 @@
                 borderWidth: 1,
                 padding: 12,
                 displayColors: false,
+                bodyFont: { family: "'JetBrains Mono', monospace", size: 13 },
                 callbacks: {
                   label: ctx => fmtPrice(ctx.raw)
                 }
