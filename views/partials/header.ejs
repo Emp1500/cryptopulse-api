@@ -1,10 +1,10 @@
-<header class="site-nav">
+<header class="site-nav" id="siteNav">
   <a href="/" class="nav-logo">
     <img src="/images/cryptologo1.png" alt="CryptoPulse" class="nav-logo-img" />
     <span class="nav-logo-crypto">Crypto</span><span class="nav-logo-pulse">Pulse</span>
   </a>
 
-  <ul class="nav-links">
+  <ul class="nav-links" id="navLinks">
     <li><a href="/" class="nav-link">Home</a></li>
     <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
     <li><a href="/markets" class="nav-link">Market</a></li>
@@ -29,8 +29,37 @@
         </ul>
       </div>
     <% } else { %>
-      <a href="/auth/login" class="btn-login">Login</a>
-      <a href="/auth/register" class="btn-signup">Sign Up</a>
+      <a href="/auth/login" class="btn-nav-login">Login</a>
+      <a href="/auth/register" class="btn-nav-signup">Sign Up</a>
     <% } %>
   </div>
+
+  <button class="nav-hamburger" id="navHamburger" aria-label="Toggle navigation" aria-expanded="false">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="3" y1="6" x2="19" y2="6"/>
+      <line x1="3" y1="11" x2="19" y2="11"/>
+      <line x1="3" y1="16" x2="19" y2="16"/>
+    </svg>
+  </button>
 </header>
+
+<script>
+(function () {
+  // Active nav state
+  var path = window.location.pathname;
+  document.querySelectorAll('.nav-link').forEach(function (a) {
+    var href = a.getAttribute('href');
+    if (href === '/' ? path === '/' : path.startsWith(href)) {
+      a.classList.add('nav-link--active');
+    }
+  });
+
+  // Mobile hamburger
+  var hamburger = document.getElementById('navHamburger');
+  var navLinks = document.getElementById('navLinks');
+  hamburger.addEventListener('click', function () {
+    var open = navLinks.classList.toggle('nav-links--open');
+    hamburger.setAttribute('aria-expanded', open);
+  });
+})();
+</script>
