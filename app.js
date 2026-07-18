@@ -14,6 +14,7 @@ const pgSession = require('connect-pg-simple')(session);
 const { Pool } = require('pg');
 const app = express();
 const path = require('path');
+const fs = require('fs');
 const axios = require('axios');
 const logger = require('./config/logger');
 const supabase = require('./config/database');
@@ -58,22 +59,32 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+if (!process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET environment variable is required');
+}
+
 // Session middleware — uses PostgreSQL store in production, in-memory for tests
 const sessionConfig = {
-  secret: process.env.SESSION_SECRET || 'fallback-secret-key',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    // 'auto' marks the cookie Secure only when the request is actually HTTPS
+    // (honors `trust proxy` above), instead of trusting NODE_ENV to be set correctly.
+    secure: 'auto',
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000
   }
 };
 
 if (process.env.DATABASE_URL) {
+  // Supabase's pooler chains to its own "Supabase Root 2021 CA", which isn't in
+  // Node's default trust store — pin to it so certs are actually verified
+  // instead of disabling verification (rejectUnauthorized: false) wholesale.
+  const supabaseCa = fs.readFileSync(path.join(__dirname, 'config/certs/supabase-root-2021-ca.pem'), 'utf8');
   const pgPool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: { rejectUnauthorized: true, ca: supabaseCa }
   });
   sessionConfig.store = new pgSession({
     pool: pgPool,
